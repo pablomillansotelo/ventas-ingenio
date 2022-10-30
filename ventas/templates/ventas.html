@@ -1,0 +1,146 @@
+{%  extends "base.html" %}
+{% load static %}
+{% block content %}
+
+
+<div id="EditarVentaModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Editar Venta</h5>
+            </div>
+            <div class="modal-body bg-dark text-white">
+                <form method="POST" action="{% url 'EditVenta' %}" enctype="multipart/form-data"> {% csrf_token %}
+                    <input type="hidden" id="id_venta_editar" name="id_venta_editar">
+
+                    {% for field in form_editar_venta %}
+                    <p> {{field.label}} <br>
+                        {{field}}</p>
+                    {% for error in field.errors %}
+
+                    <p class="alarma">{{error}}</p>
+                    {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                    <p class="alarma">{{error}}</p>
+                    {% endfor %}
+            </div>
+            <div class="modal-footer bg-dark text-white">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                   Volver
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Aceptar
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="VerVentaModal" class="modal" style="overflow: scroll;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Ver venta</h5>
+            </div>
+            <div class="modal-body bg-dark text-white">
+                <form method="POST" action="{% url 'AddProducto' %}" enctype="multipart/form-data"> {% csrf_token %}
+
+            </div>
+            <div class="modal-footer bg-dark">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Agregar
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="EliminarVentaModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Eliminar</h5>
+            </div>
+            <div class="modal-body bg-dark text-white">
+                <p class="labelmodal">¿Estás seguro?</p>
+                <form method="POST" action="{% url 'DeleteVenta' %}">{% csrf_token %}
+                    <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
+            </div>
+            <div class="modal-footer bg-dark text-white">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                   Volver
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Aceptar
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3 class="text-center">Ventas   </h3>
+        <div class="col-md-3 pb-2">
+            <a href="{%  url "Carrito" %}" class="nav-link">
+                <button type="button" class="btn btn-success">
+                    Crear venta
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </a>
+        </div>
+        <div class="card card-body" style="overflow:scroll">
+            <table class="table table-hover table-primary" >
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Monto</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-dark">
+                    {% for i in Ventas %}
+                    <tr>
+                        <td>{{ i.id_venta }}</td>
+                        <td>{{ i.cliente }}</td>
+                        <td>{{ i.fecha }}</td>
+                        <td>{{ i.monto }}</td>
+                        <td>
+                            <button onclick="editarPersonal('{{ i.id_cliente }}','{{ i.nombre }}', '{{ i.apellidos }}', '{{ i.direccion }}', '{{ i.email }}', '{{ i.telefono }}')" class="btn btn-dark-outline btn-sm" data-toggle="modal"
+                                href="#VerVentaModal"><img src="{% static 'index/img/chart.png' %}" alt="Error"
+                                    width="30"></button>
+                            <button onclick="editarVenta('{{ i.id_venta }}','{{ i.cliente }}', '{{ i.fecha }}')" class="btn btn-dark-outline btn-sm" data-toggle="modal"
+                                href="#EditarVentaModal"><img src="{% static 'index/img/editar.png' %}" alt="Error"
+                                    width="30"></button>
+                            <button onclick="eliminarPersonal('{{ i.id_venta }}')" class="btn btn-dark-outline btn-sm"
+                                data-toggle="modal" href="#EliminarVentaModal"><img
+                                    src="{% static 'index/img/delete.png' %}" alt="Error" width="30"></button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        text: "{{message}}",
+    })
+</script>
+{% endfor %}
+{% endif %}
+{% endblock %}

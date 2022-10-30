@@ -1,0 +1,169 @@
+{%  extends "base.html" %}
+{% load static %}
+{% block content %}
+
+
+<div id="EditarVentaModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Editar Venta</h5>
+            </div>
+            <div class="modal-body bg-dark text-white">
+                <form method="POST" action="{% url 'EditVenta' %}" enctype="multipart/form-data"> {% csrf_token %}
+                    <input type="hidden" id="id_venta_editar" name="id_venta_editar">
+
+                    {% for field in form_editar_venta %}
+                    <p> {{field.label}} <br>
+                        {{field}}</p>
+                    {% for error in field.errors %}
+
+                    <p class="alarma">{{error}}</p>
+                    {% endfor %}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %}
+                    <p class="alarma">{{error}}</p>
+                    {% endfor %}
+            </div>
+            <div class="modal-footer bg-dark text-white">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                   Volver
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Aceptar
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id="VerVentaModal" class="modal" style="overflow: scroll;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Ver venta</h5>
+            </div>
+            <div class="modal-body bg-dark text-white">
+                <form method="POST" action="{% url 'AddProducto' %}" enctype="multipart/form-data"> {% csrf_token %}
+
+            </div>
+            <div class="modal-footer bg-dark">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Agregar
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="EliminarVentaModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Eliminar</h5>
+            </div>
+            <div class="modal-body bg-dark text-white">
+                <p class="labelmodal">¿Estás seguro?</p>
+                <form method="POST" action="{% url 'DeleteVenta' %}">{% csrf_token %}
+                    <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
+            </div>
+            <div class="modal-footer bg-dark text-white">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                   Volver
+                </button>
+                <button type="submit" class="btn btn-success">
+                    Aceptar
+                </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3 class="text-center">Nueva venta   </h3>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card card-secondary ">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-shopping-cart"></i> Datos de la factura</h3>
+                    </div>
+                    <div class="card-body">
+                        {% for field in form_venta %}
+                        <p> {{field.label}}
+                            {{field}}</p>
+                        {% for error in field.errors %}
+                        <p class="alarma">{{error}}</p>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="fas fa-shopping-cart"></i> Agregar Producto</h3>
+                    </div>
+                    <div class="card-body">
+
+                        {% for field in form_add_venta_detalle %}
+                        <p> {{field.label}}
+                            {{field}}</p>
+                        {% for error in field.errors %}
+
+                        <p class="alarma">{{error}}</p>
+                        {% endfor %}
+                        {% endfor %}
+                        <a  class="nav-link">
+                            <button type="button" class="btn btn-success" onclick="agregar_productos()">
+                                Agregar Producto
+                                <i class="fas fa-plus-circle"></i>
+                            </button>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card card-body" style="overflow:scroll">
+            <table class="table table-hover table-primary" id="tblProducts">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Descuento</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-9 pb-2">
+            <a class="nav-link">
+                <button onclick="pagar_carrito()" type="button" class="btn btn-success">
+                    Pagar carrito
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+            </a>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" charset="utf8" src="{% static 'venta/forms.js' %}"></script>
+{% if messages %}
+{% for message in messages %}
+<script>
+    Swal.fire({
+        text: "{{message}}",
+    })
+</script>
+{% endfor %}
+{% endif %}
+{% endblock %}
