@@ -11,8 +11,8 @@ class Cliente(models.Model):
     telefono = models.CharField(max_length=15, blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'cliente'
+        managed = True
+        db_table = 'cat_cliente'
 
     def __str__(self):
         return str(self.id_cliente) + ' - ' + self.nombre + ' ' +self.apellidos
@@ -23,8 +23,8 @@ class Producto(models.Model):
     precio_unitario = models.DecimalField(max_digits=19, decimal_places=4)
 
     class Meta:
-        managed = False
-        db_table = 'producto'
+        managed = True
+        db_table = 'cat_producto'
 
     def __str__(self):
         return str(self.id_producto) + ' - ' +self.producto
@@ -36,22 +36,23 @@ class Venta(models.Model):
     fecha = models.DateField(blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'venta'
+        managed = True
+        db_table = 'tra_venta'
 
     def __str__(self):
         return self.id_venta
 
 
 class VentaDetalle(models.Model):
-    id_venta = models.ForeignKey(Venta, models.DO_NOTHING, db_column='id_venta', primary_key=True)
+    id_venta_det = models.AutoField(primary_key=True)  
+    id_venta = models.ForeignKey(Venta, models.DO_NOTHING, db_column='id_venta')
     id_producto = models.ForeignKey(Producto, models.DO_NOTHING, db_column='id_producto')
     cantidad = models.IntegerField()
     descuento = models.DecimalField(max_digits=19, decimal_places=4, blank=True, null=True)
 
     class Meta:
-        managed = False
-        db_table = 'venta_detalle'
+        managed = True
+        db_table = 'tra_venta_det'
         unique_together = (('id_venta', 'id_producto'),)
 
 

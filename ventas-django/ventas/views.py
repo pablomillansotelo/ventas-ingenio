@@ -5,11 +5,11 @@ from django.contrib import messages
 from django import forms
 from django.db import connections
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
-
+@login_required
 def carrito_view(request):
     cursor = connections['default'].cursor()
     productos = Producto.objects.all()
@@ -23,6 +23,7 @@ def carrito_view(request):
     }
     return render(request, 'carrito.html', context)
 
+@login_required
 @csrf_exempt
 def add_carrito_view(request):
     cursor = connections['default'].cursor()
@@ -44,6 +45,7 @@ def add_carrito_view(request):
 
     return redirect('Carrito')
 
+@login_required
 def ventas_view(request):
     cursor = connections['default'].cursor()
     ventas = cursor.execute('EXEC mostrar_ventas')
@@ -54,6 +56,7 @@ def ventas_view(request):
     }
     return render(request, 'ventas.html', context)
 
+@login_required
 def edit_venta_view(request):
     if request.POST.get('nombre') and request.POST.get('apellidos') and request.POST.get(
             'direccion') and request.POST.get('email') and request.POST.get('telefono'):
@@ -69,7 +72,7 @@ def edit_venta_view(request):
         messages.success(request, 'El cliente ha sido modificado')
     return redirect('Ventas')
 
-
+@login_required
 def clientes_view(request):
     clientes = Cliente.objects.all()
     form_cliente = AddClienteForm
@@ -81,7 +84,7 @@ def clientes_view(request):
     }
     return render(request, 'clientes.html', context)
 
-
+@login_required
 def add_clientes_view(request):
     if request.POST:
         if request.POST.get('nombre') and request.POST.get('apellidos') and request.POST.get(
@@ -98,7 +101,7 @@ def add_clientes_view(request):
             messages.success(request, 'El cliente ha sido agregado')
     return redirect('Clientes')
 
-
+@login_required
 def edit_clientes_view(request):
     if request.POST.get('nombre') and request.POST.get('apellidos') and request.POST.get(
             'direccion') and request.POST.get('email') and request.POST.get('telefono'):
@@ -114,7 +117,7 @@ def edit_clientes_view(request):
         messages.success(request, 'El cliente ha sido modificado')
     return redirect('Clientes')
 
-
+@login_required
 def delete_clientes_view(request):
     if request.POST:
         cursor = connections['default'].cursor()
@@ -124,7 +127,7 @@ def delete_clientes_view(request):
 
     return redirect('Clientes')
 
-
+@login_required
 def inventario_view(request):
     productos = Producto.objects.all()
     form_producto = AddProductoForm
@@ -136,7 +139,7 @@ def inventario_view(request):
     }
     return render(request, 'inventario.html', context)
 
-
+@login_required
 def add_producto_view(request):
     if request.POST:
         if request.POST.get('producto') and request.POST.get('precio_unitario') :
@@ -149,7 +152,7 @@ def add_producto_view(request):
             messages.success(request, 'El producto ha sido agregado')
     return redirect('Inventario')
 
-
+@login_required
 def delete_producto_view(request):
     if request.POST:
         cursor = connections['default'].cursor()
@@ -158,6 +161,7 @@ def delete_producto_view(request):
         messages.success(request, 'El producto ha sido eliminado')
     return redirect('Inventario')
 
+@login_required
 def edit_producto_view(request):
     producto_temporal = Producto()
     producto_temporal.id_producto = request.POST.get('id_producto_editar')
@@ -169,6 +173,7 @@ def edit_producto_view(request):
     messages.success(request, 'El producto ha sido modificado')
     return redirect('Inventario')
 
+@login_required
 def delete_venta_view(request):
     if request.POST:
         cursor = connections['default'].cursor()
