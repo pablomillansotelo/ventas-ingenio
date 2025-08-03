@@ -87,7 +87,16 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT', default='5432'),
-    }
+    },
+     'auth': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('AUTH_NAME'),
+        'USER': config('AUTH_USER'),
+        'PASSWORD': config('AUTH_PASSWORD'),
+        'HOST': config('AUTH_HOST'),
+        'PORT': config('AUTH_PORT', default='5432'),
+        # otros datos...
+    },
 }
 
 
@@ -109,7 +118,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_REDIRECT_URL = '/carrito/'
+LOGIN_REDIRECT_URL = '/ventas/carrito/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/'
 
@@ -141,3 +150,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DATABASE_ROUTERS = ['api.dbrouters.auth_router.AuthRouter']
+
