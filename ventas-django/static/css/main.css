@@ -1,3 +1,7 @@
+.navbar-toggler-icon {
+  filter: invert(1) brightness(2);
+}
+
 .abs-center {
     display: flex;
     align-items: center;

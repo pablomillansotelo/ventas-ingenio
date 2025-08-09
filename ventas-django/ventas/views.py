@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
-from .models import Cliente, Producto
+from .models import Cliente, Producto, Venta, VentaDetalle
 from .forms import AddClienteForm, EditarClienteForm, AddProductoForm, EditarProductoForm, EditarVentaForm, AddVentaForm, AddVentaDetalleForm
 from django.contrib import messages
 from django import forms
-from django.db import connections
+from django.db import connections, transaction
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 
@@ -21,40 +21,57 @@ def carrito_view(request):
         'form_add_venta_detalle': form_add_venta_detalle,
         #'form_editar_venta': form_editar_venta,
     }
-    return render(request, 'carrito.html', context)
+    return render(request, 'ventas/carrito.html', context)
 
 @login_required
 @csrf_exempt
 def add_carrito_view(request):
-    cursor = connections['default'].cursor()
-    productos = Producto.objects.all()
     if request.method == "POST":
-        nplainArray = request.POST.getlist('nplainArray[]')
         id_cliente_add = request.POST.get('id_cliente_add')
         fecha_add = request.POST.get('fecha_add')
-        print('Agregar cliente: ' + id_cliente_add)
-        print('Agregar fecha: ' + fecha_add)
-        print('id del producto 0: ' + request.POST.get('nplainArray[0]'))
-        #print('id del producto 0: ' + request.POST.get('nplainArray[0][1]'))
-        #print('id del producto 0: ' + request.POST.get('nplainArray[0][2]'))
-        #print('id del producto 0: ' + nplainArray[0][3])
-        #print('id del producto 1' + nplainArray[1][0])
-        #cursor.execute("declare @tabla_temp as venta_detalleTableType")
-        #cursor.execute("insert into @tabla_temp (id_producto_tt, cantidad_tt, descuento_tt) values ("+nplainArray[0].id_producto +", "+ nplainArray[0].cantidad +")")
-        messages.success(request, "Column data are updated successfully!")
+        nplainArray = request.POST.getlist('nplainArray[]')  # Debe ser una lista de strings tipo JSON o similar
 
+        try:
+            cliente = Cliente.objects.get(pk=id_cliente_add)
+        except Cliente.DoesNotExist:
+            messages.error(request, "Cliente no encontrado")
+            return redirect('Carrito')
+
+        with transaction.atomic():
+            venta = Venta.objects.create(
+                id_cliente=cliente,
+                fecha=fecha_add
+            )
+
+            # Suponiendo que nplainArray es una lista de strings tipo "id_producto,cantidad,descuento"
+            for item in nplainArray:
+                partes = item.split(',')
+                id_producto = partes[0]
+                cantidad = partes[1]
+                descuento = partes[2] if len(partes) > 2 else None
+
+                producto = Producto.objects.get(pk=id_producto)
+                VentaDetalle.objects.create(
+                    id_venta=venta,
+                    id_producto=producto,
+                    cantidad=cantidad,
+                    descuento=descuento
+                )
+
+        messages.success(request, "Venta y productos agregados correctamente")
     return redirect('Carrito')
 
 @login_required
 def ventas_view(request):
-    cursor = connections['default'].cursor()
-    ventas = cursor.execute('EXEC mostrar_ventas')
+    ventas = Venta.objects.select_related('id_cliente').prefetch_related(
+        'ventadetalle_set__id_producto'
+    ).all()
     form_editar_venta = EditarVentaForm
     context = {
         'Ventas': ventas,
         'form_editar_venta': form_editar_venta,
     }
-    return render(request, 'ventas.html', context)
+    return render(request, 'ventas/ventas.html', context)
 
 @login_required
 def edit_venta_view(request):
@@ -82,22 +99,24 @@ def clientes_view(request):
         'form_cliente': form_cliente,
         'form_editar_cliente': form_editar_cliente,
     }
-    return render(request, 'clientes.html', context)
+    return render(request, 'ventas/clientes.html', context)
 
 @login_required
 def add_clientes_view(request):
-    if request.POST:
-        if request.POST.get('nombre') and request.POST.get('apellidos') and request.POST.get(
-                'direccion') and request.POST.get('email') and request.POST.get('telefono'):
-            cliente_temporal = Cliente()
-            cliente_temporal.nombre = request.POST.get('nombre')
-            cliente_temporal.apellidos = request.POST.get('apellidos')
-            cliente_temporal.direccion = request.POST.get('direccion')
-            cliente_temporal.email = request.POST.get('email')
-            cliente_temporal.telefono = request.POST.get('telefono')
-            cursor = connections['default'].cursor()
-            cursor.execute(
-                "EXEC insertar_cliente '" + cliente_temporal.nombre + "', '" + cliente_temporal.apellidos + "', '" + cliente_temporal.direccion + "', '" + cliente_temporal.email + "', '" + cliente_temporal.telefono + "'")
+    if request.method == "POST":
+        nombre = request.POST.get('nombre')
+        apellidos = request.POST.get('apellidos')
+        direccion = request.POST.get('direccion')
+        email = request.POST.get('email')
+        telefono = request.POST.get('telefono')
+        if nombre and apellidos and direccion and email and telefono:
+            Cliente.objects.create(
+                nombre=nombre,
+                apellidos=apellidos,
+                direccion=direccion,
+                email=email,
+                telefono=telefono
+            )
             messages.success(request, 'El cliente ha sido agregado')
     return redirect('Clientes')
 
@@ -137,18 +156,18 @@ def inventario_view(request):
         'form_producto': form_producto,
         'form_editar_producto': form_editar_producto,
     }
-    return render(request, 'inventario.html', context)
+    return render(request, 'ventas/inventario.html', context)
 
 @login_required
 def add_producto_view(request):
-    if request.POST:
-        if request.POST.get('producto') and request.POST.get('precio_unitario') :
-            producto_temporal = Producto()
-            producto_temporal.producto = request.POST.get('producto')
-            producto_temporal.precio_unitario = request.POST.get('precio_unitario')
-            cursor = connections['default'].cursor()
-            cursor.execute(
-                "EXEC insertar_producto '" + producto_temporal.producto + "', " + producto_temporal.precio_unitario)
+    if request.method == "POST":
+        producto = request.POST.get('producto')
+        precio_unitario = request.POST.get('precio_unitario')
+        if producto and precio_unitario:
+            Producto.objects.create(
+                producto=producto,
+                precio_unitario=precio_unitario
+            )
             messages.success(request, 'El producto ha sido agregado')
     return redirect('Inventario')
 

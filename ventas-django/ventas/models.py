@@ -40,8 +40,7 @@ class Venta(models.Model):
         db_table = 'tra_venta'
 
     def __str__(self):
-        return self.id_venta
-
+        return str(self.id_venta)
 
 class VentaDetalle(models.Model):
     id_venta_det = models.AutoField(primary_key=True)  
