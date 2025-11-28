@@ -3,15 +3,13 @@ from .models import Cliente, Producto, Venta, VentaDetalle
 from .forms import AddClienteForm, EditarClienteForm, AddProductoForm, EditarProductoForm, EditarVentaForm, AddVentaForm, AddVentaDetalleForm
 from django.contrib import messages
 from django import forms
-from django.db import connections, transaction
-from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
 from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
 @login_required
 def carrito_view(request):
-    cursor = connections['default'].cursor()
     productos = Producto.objects.all()
     form_venta = AddVentaForm
     form_add_venta_detalle = AddVentaDetalleForm
@@ -24,7 +22,6 @@ def carrito_view(request):
     return render(request, 'ventas/carrito.html', context)
 
 @login_required
-@csrf_exempt
 def add_carrito_view(request):
     if request.method == "POST":
         id_cliente_add = request.POST.get('id_cliente_add')
@@ -75,18 +72,20 @@ def ventas_view(request):
 
 @login_required
 def edit_venta_view(request):
-    if request.POST.get('nombre') and request.POST.get('apellidos') and request.POST.get(
-            'direccion') and request.POST.get('email') and request.POST.get('telefono'):
-        cliente_temporal = Cliente()
-        cliente_temporal.id_cliente = request.POST.get('id_personal_editar')
-        cliente_temporal.nombre = request.POST.get('nombre')
-        cliente_temporal.apellidos = request.POST.get('apellidos')
-        cliente_temporal.direccion = request.POST.get('direccion')
-        cliente_temporal.email = request.POST.get('email')
-        cliente_temporal.telefono = request.POST.get('telefono')
-        cursor = connections['default'].cursor()
-        cursor.execute("EXEC modificar_cliente " + cliente_temporal.id_cliente + ", '"+ cliente_temporal.nombre + "', '"+ cliente_temporal.apellidos + "', '"+ cliente_temporal.direccion + "', '" + cliente_temporal.email + "', '" + cliente_temporal.telefono + "'")
-        messages.success(request, 'El cliente ha sido modificado')
+    if request.method == "POST":
+        cliente_id = request.POST.get('id_personal_editar')
+        if cliente_id:
+            try:
+                cliente = Cliente.objects.get(pk=cliente_id)
+                cliente.nombre = request.POST.get('nombre', cliente.nombre)
+                cliente.apellidos = request.POST.get('apellidos', cliente.apellidos)
+                cliente.direccion = request.POST.get('direccion', cliente.direccion)
+                cliente.email = request.POST.get('email', cliente.email)
+                cliente.telefono = request.POST.get('telefono', cliente.telefono)
+                cliente.save()
+                messages.success(request, 'El cliente ha sido modificado')
+            except Cliente.DoesNotExist:
+                messages.error(request, 'Cliente no encontrado')
     return redirect('Ventas')
 
 @login_required
@@ -122,28 +121,37 @@ def add_clientes_view(request):
 
 @login_required
 def edit_clientes_view(request):
-    if request.POST.get('nombre') and request.POST.get('apellidos') and request.POST.get(
-            'direccion') and request.POST.get('email') and request.POST.get('telefono'):
-        cliente_temporal = Cliente()
-        cliente_temporal.id_cliente = request.POST.get('id_personal_editar')
-        cliente_temporal.nombre = request.POST.get('nombre')
-        cliente_temporal.apellidos = request.POST.get('apellidos')
-        cliente_temporal.direccion = request.POST.get('direccion')
-        cliente_temporal.email = request.POST.get('email')
-        cliente_temporal.telefono = request.POST.get('telefono')
-        cursor = connections['default'].cursor()
-        cursor.execute("EXEC modificar_cliente " + cliente_temporal.id_cliente + ", '"+ cliente_temporal.nombre + "', '"+ cliente_temporal.apellidos + "', '"+ cliente_temporal.direccion + "', '" + cliente_temporal.email + "', '" + cliente_temporal.telefono + "'")
-        messages.success(request, 'El cliente ha sido modificado')
+    if request.method == "POST":
+        cliente_id = request.POST.get('id_personal_editar')
+        if cliente_id:
+            try:
+                cliente = Cliente.objects.get(pk=cliente_id)
+                cliente.nombre = request.POST.get('nombre', cliente.nombre)
+                cliente.apellidos = request.POST.get('apellidos', cliente.apellidos)
+                cliente.direccion = request.POST.get('direccion', cliente.direccion)
+                cliente.email = request.POST.get('email', cliente.email)
+                cliente.telefono = request.POST.get('telefono', cliente.telefono)
+                cliente.save()
+                messages.success(request, 'El cliente ha sido modificado')
+            except Cliente.DoesNotExist:
+                messages.error(request, 'Cliente no encontrado')
     return redirect('Clientes')
 
 @login_required
 def delete_clientes_view(request):
-    if request.POST:
-        cursor = connections['default'].cursor()
-        print("El id a eliminar: " + request.POST.get('id_personal_eliminar'))
-        cursor.execute("EXEC eliminar_cliente " + request.POST.get('id_personal_eliminar'))
-        messages.success(request, 'El cliente ha sido eliminado')
-
+    if request.method == "POST":
+        cliente_id = request.POST.get('id_personal_eliminar')
+        if cliente_id:
+            try:
+                cliente = Cliente.objects.get(pk=cliente_id)
+                # Verificar si tiene ventas asociadas
+                if Venta.objects.filter(id_cliente=cliente).exists():
+                    messages.error(request, 'No se puede eliminar el cliente porque tiene ventas asociadas')
+                else:
+                    cliente.delete()
+                    messages.success(request, 'El cliente ha sido eliminado')
+            except Cliente.DoesNotExist:
+                messages.error(request, 'Cliente no encontrado')
     return redirect('Clientes')
 
 @login_required
@@ -173,31 +181,53 @@ def add_producto_view(request):
 
 @login_required
 def delete_producto_view(request):
-    if request.POST:
-        cursor = connections['default'].cursor()
-        print("El id a eliminar: " + request.POST.get('id_producto_eliminar'))
-        cursor.execute("EXEC eliminar_producto " + request.POST.get('id_producto_eliminar'))
-        messages.success(request, 'El producto ha sido eliminado')
+    if request.method == "POST":
+        producto_id = request.POST.get('id_producto_eliminar')
+        if producto_id:
+            try:
+                producto = Producto.objects.get(pk=producto_id)
+                # Verificar si está en ventas
+                if VentaDetalle.objects.filter(id_producto=producto).exists():
+                    messages.error(request, 'No se puede eliminar el producto porque está en ventas')
+                else:
+                    producto.delete()
+                    messages.success(request, 'El producto ha sido eliminado')
+            except Producto.DoesNotExist:
+                messages.error(request, 'Producto no encontrado')
     return redirect('Inventario')
 
 @login_required
 def edit_producto_view(request):
-    producto_temporal = Producto()
-    producto_temporal.id_producto = request.POST.get('id_producto_editar')
-    producto_temporal.producto = request.POST.get('producto')
-    producto_temporal.precio_unitario = request.POST.get('precio_unitario')
-    cursor = connections['default'].cursor()
-    cursor.execute(
-        "EXEC modificar_producto " + producto_temporal.id_producto + ", '" + producto_temporal.producto + "', " + producto_temporal.precio_unitario)
-    messages.success(request, 'El producto ha sido modificado')
+    if request.method == "POST":
+        producto_id = request.POST.get('id_producto_editar')
+        if producto_id:
+            try:
+                producto = Producto.objects.get(pk=producto_id)
+                producto.producto = request.POST.get('producto', producto.producto)
+                precio = request.POST.get('precio_unitario')
+                if precio:
+                    try:
+                        producto.precio_unitario = float(precio)
+                    except ValueError:
+                        messages.error(request, 'Precio inválido')
+                        return redirect('Inventario')
+                producto.save()
+                messages.success(request, 'El producto ha sido modificado')
+            except Producto.DoesNotExist:
+                messages.error(request, 'Producto no encontrado')
     return redirect('Inventario')
 
 @login_required
 def delete_venta_view(request):
-    if request.POST:
-        cursor = connections['default'].cursor()
-        print("El id a eliminar: " + request.POST.get('id_venta_eliminar'))
-        cursor.execute("EXEC eliminar_venta " + request.POST.get('id_venta_eliminar'))
-        messages.success(request, 'La venta y su contenido se ha eliminado')
-
-    return redirect('Clientes')
+    if request.method == "POST":
+        venta_id = request.POST.get('id_venta_eliminar')
+        if venta_id:
+            try:
+                venta = Venta.objects.get(pk=venta_id)
+                # Eliminar detalles primero (si hay restricciones de foreign key)
+                VentaDetalle.objects.filter(id_venta=venta).delete()
+                venta.delete()
+                messages.success(request, 'La venta y su contenido se ha eliminado')
+            except Venta.DoesNotExist:
+                messages.error(request, 'Venta no encontrada')
+    return redirect('Ventas')

@@ -15,10 +15,6 @@
     }
  }
 
-.nav-item:hover{
-background-color: #627384;
-border-radius: 15px;
-}
 
 .abb-center {
    display: flex;

@@ -12,10 +12,10 @@
 <div id="AgregarPersonalModal" class="modal fade" style="overflow: scroll;">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark">Agregar nuevo</h5>
+            <div class="modal-header bg-dark">
+                <h5 class="modal-title text-light">Agregar nuevo</h5>
             </div>
-            <div class="modal-body bg-dark text-white">
+            <div class="modal-body">
                 <form method="POST" action="{% url 'AddCliente' %}" enctype="multipart/form-data">{% csrf_token %}
                     {% for field in form_cliente %}
                     <p>{{field.label}} <br>
@@ -28,7 +28,7 @@
                     <p class="alarma">{{error}}</p>
                     {% endfor %}
             </div>
-            <div class="modal-footer bg-dark">
+            <div class="modal-footer">
                 <button type="button" class="btn btn-danger" data-dismiss="modal">
                     Cancelar
                 </button>
@@ -102,6 +102,7 @@
     <div class="col-md-12">
         <h3 class="text-center">Clientes   </h3>
         <div class="col-md-3 pb-2">
+            <div class="flex-grow-1"></div>
             <a href="#AgregarPersonalModal"
                 data-toggle="modal" data-dismiss="modal">
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AgregarPersonalModal">
@@ -111,8 +112,8 @@
             </a>
         </div>
         <div class="card card-body" style="overflow:scroll">
-            <table class="table table-hover table-primary" >
-                <thead>
+            <table class="table" >
+                <thead class="table-primary">
                     <tr>
                         <th>ID</th>
                         <th>Nombre</th>

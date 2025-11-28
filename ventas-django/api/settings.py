@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-i^s2bj(gflcf5cza9go9#3-_z1&4bpksf*nas01ukb_p)cj2ti'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-i^s2bj(gflcf5cza9go9#3-_z1&4bpksf*nas01ukb_p)cj2ti')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'widget_tweaks',
     'ventas',
-
 ]
 
 MIDDLEWARE = [
@@ -152,4 +152,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DATABASE_ROUTERS = ['api.dbrouters.auth_router.AuthRouter']
+
+# API Configuration for Integration
+SII_API_URL = config('SII_API_URL', default='http://localhost:8001/api/alumnos/')
+AULA_API_URL = config('AULA_API_URL', default='http://localhost:8002/api/')
 
