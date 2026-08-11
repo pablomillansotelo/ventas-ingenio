@@ -89,6 +89,8 @@ DATABASES = {
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT', default='5432'),
+        # Neon/pgbouncer: evita InvalidCursorName con cursores server-side.
+        'DISABLE_SERVER_SIDE_CURSORS': True,
     },
      'auth': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -97,7 +99,7 @@ DATABASES = {
         'PASSWORD': config('AUTH_PASSWORD'),
         'HOST': config('AUTH_HOST'),
         'PORT': config('AUTH_PORT', default='5432'),
-        # otros datos...
+        'DISABLE_SERVER_SIDE_CURSORS': True,
     },
 }
 
