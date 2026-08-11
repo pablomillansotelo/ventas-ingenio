@@ -9,12 +9,19 @@ def poblar_codigos_curso(apps, schema_editor):
 
 
 def poblar_precio_detalle(apps, schema_editor):
+    """Corre después del rename de Curso en state (id_curso, precio_lista)."""
     VentaDetalle = apps.get_model('ventas', 'VentaDetalle')
     Curso = apps.get_model('ventas', 'Curso')
-    cursos = {c.id_producto: c.precio_unitario for c in Curso.objects.all()}
+    curso_pk = Curso._meta.pk.name
+    price_field = next(
+        (f.name for f in Curso._meta.fields if f.name in ('precio_lista', 'precio_unitario')),
+        'precio_lista',
+    )
+    cursos = {getattr(c, curso_pk): getattr(c, price_field) for c in Curso.objects.all()}
+    fk_attr = 'id_producto_id' if hasattr(VentaDetalle, 'id_producto_id') else 'id_curso_id'
     for detalle in VentaDetalle.objects.all():
         if detalle.precio_unitario is None:
-            precio = cursos.get(detalle.id_producto_id)
+            precio = cursos.get(getattr(detalle, fk_attr))
             if precio is not None:
                 VentaDetalle.objects.filter(pk=detalle.pk).update(precio_unitario=precio)
 

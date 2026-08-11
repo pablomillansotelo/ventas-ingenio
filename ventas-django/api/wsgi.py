@@ -12,5 +12,8 @@ from api.middleware.auto_migrate import apply_pending_migrations
 
 app = get_wsgi_application()
 
-# Intento temprano en cold start (la middleware repite si esto no alcanza a correr).
-apply_pending_migrations()
+# Intento temprano en cold start; no debe tumbar el import del módulo WSGI.
+try:
+    apply_pending_migrations()
+except Exception:
+    pass

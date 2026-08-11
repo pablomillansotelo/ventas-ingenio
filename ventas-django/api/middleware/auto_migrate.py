@@ -49,12 +49,18 @@ def apply_pending_migrations():
         if _migrations_applied:
             return
 
-        # --fake-initial: tablas creadas con init.sql → salta 0001 y aplica 0002+
-        call_command('migrate', '--noinput', '--fake-initial', verbosity=1)
-        call_command('migrate', '--database=auth', '--noinput', '--fake-initial', verbosity=1)
+        # Esquema mínimo primero: cat_vendedor y columnas nuevas aunque migrate falle.
         _ensure_minimum_schema()
+        try:
+            # --fake-initial: tablas creadas con init.sql → salta 0001 y aplica 0002+
+            call_command('migrate', '--noinput', '--fake-initial', verbosity=1)
+            call_command('migrate', '--database=auth', '--noinput', '--fake-initial', verbosity=1)
+            _ensure_minimum_schema()
+            logger.info('Migraciones y esquema mínimo verificados')
+        except Exception:
+            logger.exception('No se pudieron aplicar las migraciones al iniciar la app')
+            _ensure_minimum_schema()
         _migrations_applied = True
-        logger.info('Migraciones y esquema mínimo verificados')
 
 
 class AutoMigrateMiddleware:
