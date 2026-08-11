@@ -1,0 +1,42 @@
+{% load static %}
+{% with current=request.resolver_match.url_name %}
+<aside class="app-sidebar" id="appSidebar">
+  <a class="sidebar-brand" href="{% url 'Carrito' %}">
+    <img src="{% static 'img/logo modelo ingenio blanco.png' %}" alt="Ingenio">
+    <div>
+      <div class="sidebar-brand-text">Ventas Ingenio</div>
+      <div class="sidebar-brand-sub">Modelo Ingenio</div>
+    </div>
+  </a>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-nav-label">Principal</div>
+    <a class="sidebar-link{% if current == 'Carrito' %} active{% endif %}" href="{% url 'Carrito' %}">
+      <i class="bi bi-cart3"></i> Punto de venta
+    </a>
+    <a class="sidebar-link{% if current == 'Ventas' %} active{% endif %}" href="{% url 'Ventas' %}">
+      <i class="bi bi-receipt"></i> Ventas
+    </a>
+
+    <div class="sidebar-nav-label">Catálogos</div>
+    <a class="sidebar-link{% if current == 'Clientes' %} active{% endif %}" href="{% url 'Clientes' %}">
+      <i class="bi bi-people"></i> Clientes
+    </a>
+    <a class="sidebar-link{% if current == 'Inventario' %} active{% endif %}" href="{% url 'Inventario' %}">
+      <i class="bi bi-box-seam"></i> Inventario
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    {% if user.is_staff %}
+    <a class="sidebar-link" href="{% url 'admin:index' %}">
+      <i class="bi bi-gear"></i> Administración
+    </a>
+    {% endif %}
+    <a class="sidebar-link logout" href="{% url 'logout' %}">
+      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </a>
+  </div>
+</aside>
+<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+{% endwith %}

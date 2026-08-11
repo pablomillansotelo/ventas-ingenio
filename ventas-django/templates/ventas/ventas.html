@@ -1,116 +1,108 @@
 {% extends "base.html" %}
-{% load static %}
+
+{% block title %}Ventas — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Principal / Ventas{% endblock %}
+
 {% block content %}
-
-<div id="EditarVentaModal" class="modal fade" tabindex="-1" aria-labelledby="EditarVentaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="EditarVentaModalLabel">Editar Venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="POST" action="{% url 'EditVenta' %}">
-                {% csrf_token %}
-                <input type="hidden" id="id_venta_editar" name="id_venta_editar">
-                <div class="modal-body bg-dark text-white">
-                    {% for field in form_editar_venta %}
-                    <p>{{ field.label }}<br>
-                        {{ field }}</p>
-                    {% for error in field.errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                    {% endfor %}
-                    {% for error in form_editar_venta.non_field_errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer bg-dark text-white">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
-                    <button type="submit" class="btn btn-success">Aceptar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Historial de ventas</h1>
+    <p class="page-subtitle">Consulta y administra las transacciones registradas</p>
+  </div>
+  <a href="{% url 'Carrito' %}" class="btn btn-brand">
+    <i class="bi bi-cart-plus me-1"></i> Nueva venta
+  </a>
 </div>
 
-<div id="EliminarVentaModal" class="modal fade" tabindex="-1" aria-labelledby="EliminarVentaModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="EliminarVentaModalLabel">Eliminar venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="POST" action="{% url 'DeleteVenta' %}">
-                {% csrf_token %}
-                <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
-                <div class="modal-body bg-dark text-white">
-                    <p class="labelmodal">¿Estás seguro?</p>
-                </div>
-                <div class="modal-footer bg-dark text-white">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
-                    <button type="submit" class="btn btn-success">Aceptar</button>
-                </div>
-            </form>
-        </div>
+<div class="card-app">
+  <div class="card-app-body p-0">
+    <div class="table-responsive-app">
+      <table class="table table-app mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Fecha</th>
+            <th class="text-end">Monto</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in Ventas %}
+          <tr>
+            <td><span class="text-muted">#{{ v.id_venta }}</span></td>
+            <td class="fw-medium">{{ v.cliente }}</td>
+            <td>{{ v.fecha|date:"d/m/Y" }}</td>
+            <td class="text-end fw-semibold">${{ v.monto|floatformat:2 }}</td>
+            <td class="text-end">
+              <div class="gap-actions justify-content-end">
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarVenta('{{ v.id_venta }}','{{ v.id_cliente_id }}','{{ v.fecha|date:"Y-m-d" }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarVenta" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-icon-delete"
+                  onclick="eliminarVenta('{{ v.id_venta }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEliminarVenta" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-5">No hay ventas registradas</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <h3 class="text-center">Ventas</h3>
-        <div class="col-md-3 pb-2">
-            <a href="{% url 'Carrito' %}" class="btn btn-success">
-                Crear venta
-                <i class="bi bi-plus-circle"></i>
-            </a>
+<div class="modal fade modal-app" id="modalEditarVenta" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'EditVenta' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_venta_editar" name="id_venta_editar">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar venta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="card card-body" style="overflow:scroll">
-            <table class="table table-hover table-primary">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Fecha</th>
-                        <th>Monto</th>
-                        <th>Opciones</th>
-                    </tr>
-                </thead>
-                <tbody class="text-dark">
-                    {% for i in Ventas %}
-                    <tr>
-                        <td>{{ i.id_venta }}</td>
-                        <td>{{ i.cliente }}</td>
-                        <td>{{ i.fecha }}</td>
-                        <td>{{ i.monto|floatformat:2 }}</td>
-                        <td>
-                            <button type="button"
-                                onclick="editarVenta('{{ i.id_venta }}', '{{ i.id_cliente_id }}', '{{ i.fecha|date:"Y-m-d" }}')"
-                                class="btn btn-outline-dark btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#EditarVentaModal"
-                                title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button type="button"
-                                onclick="eliminarVenta('{{ i.id_venta }}')"
-                                class="btn btn-outline-danger btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#EliminarVentaModal"
-                                title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="modal-body">
+          {% include "includes/form_fields.html" with form=form_editar_venta %}
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-brand">Actualizar</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-{% if messages %}
-<script id="django-messages-data" type="application/json">
-[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
-</script>
-{% endif %}
+<div class="modal fade modal-app" id="modalEliminarVenta" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'DeleteVenta' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar venta</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0 text-muted">¿Confirmas que deseas eliminar esta venta y su detalle?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "includes/messages.html" %}
 {% endblock %}
