@@ -6,92 +6,103 @@
     <meta charset="UTF-8" />
     <title>{% block title %}Sistema de Ventas{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Estilos propios -->
     <link href="{% static 'css/main.css' %}" rel="stylesheet" />
   </head>
   <body class="d-flex flex-column min-vh-100">
-    <!-- Header -->
+    {% with current=request.resolver_match.url_name %}
     <nav class="navbar bg-danger fixed-top">
-      <div class="container-fluid d-flex align-items-center gap-3">
-        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon text-white"></span>
+      <div class="container-fluid">
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Abrir menú">
+          <span class="navbar-toggler-icon"></span>
         </button>
-        <a class="navbar-brand flex-grow-1 text-white" href="#">Modelo Ingenio</a>
-        <div class="dropdown ms-1">
-          <button class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-bell-fill"></i></button>
-          <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end">
-            <li><a class="dropdown-item" href="#">Notificación 1</a></li>
-            <li><a class="dropdown-item" href="#">Notificación 2</a></li>
-            <li><a class="dropdown-item" href="#">Notificación 3</a></li>
+        <a class="navbar-brand text-white" href="{% url 'Carrito' %}">Ventas Ingenio</a>
+
+        <div class="d-none d-lg-flex ms-auto me-3">
+          <ul class="navbar-nav flex-row gap-2">
+            <li class="nav-item">
+              <a class="nav-link text-white{% if current == 'Carrito' %} fw-bold text-decoration-underline{% endif %}" href="{% url 'Carrito' %}">
+                <i class="bi bi-cart"></i> Carrito
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white{% if current == 'Ventas' %} fw-bold text-decoration-underline{% endif %}" href="{% url 'Ventas' %}">
+                <i class="bi bi-receipt"></i> Ventas
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white{% if current == 'Clientes' %} fw-bold text-decoration-underline{% endif %}" href="{% url 'Clientes' %}">
+                <i class="bi bi-people"></i> Clientes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-white{% if current == 'Inventario' %} fw-bold text-decoration-underline{% endif %}" href="{% url 'Inventario' %}">
+                <i class="bi bi-box-seam"></i> Inventario
+              </a>
+            </li>
           </ul>
         </div>
-        <div class="dropdown ms-1">
-          <button class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle"></i></button>
-          <ul class="dropdown-menu dropdown-menu-light dropdown-menu-end">
-            <li><a class="dropdown-item" href="#">Gestionar cuenta</a></li>
-            <li class="dropdown-item mt-3"><a class="nav-link text-danger" href="{% url 'logout' %}">Cerrar sesión</a></li>
+
+        <div class="dropdown">
+          <button class="btn dropdown-toggle text-white" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-person-circle"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% if user.is_staff %}
+            <li><a class="dropdown-item" href="{% url 'admin:index' %}">Administración</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            {% endif %}
+            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Cerrar sesión</a></li>
           </ul>
         </div>
-        <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-          <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Ventas Ingenio</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-          </div>
-          <div class="offcanvas-body">
-            <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Kardex</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Pagos</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> Dropdown </a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="#">Action</a></li>
-                  <li><a class="dropdown-item" href="#">Another action</a></li>
-                  <li>
-                    <hr class="dropdown-divider" />
-                  </li>
-                  <li><a class="dropdown-item" href="#">Something else here</a></li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-          
       </div>
     </nav>
 
-    <!-- Contenido principal -->
-    <div class="container-fluid flex-grow-1 d-flex">
-      <!-- Área de contenido -->
-      <main class="col p-4">
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Ventas Ingenio</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button>
+      </div>
+      <div class="offcanvas-body">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link{% if current == 'Carrito' %} active{% endif %}" href="{% url 'Carrito' %}">
+              <i class="bi bi-cart"></i> Carrito
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if current == 'Ventas' %} active{% endif %}" href="{% url 'Ventas' %}">
+              <i class="bi bi-receipt"></i> Ventas
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if current == 'Clientes' %} active{% endif %}" href="{% url 'Clientes' %}">
+              <i class="bi bi-people"></i> Clientes
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link{% if current == 'Inventario' %} active{% endif %}" href="{% url 'Inventario' %}">
+              <i class="bi bi-box-seam"></i> Inventario
+            </a>
+          </li>
+          <li class="nav-item mt-3">
+            <a class="nav-link text-danger" href="{% url 'logout' %}">
+              <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    {% endwith %}
+
+    <div class="container-fluid flex-grow-1 pt-5 mt-3">
+      <main class="p-3 p-md-4">
         {% block content %}
-        <!-- Aquí va el contenido específico de cada vista -->
         {% endblock %}
       </main>
-
-      <!-- Sidebar -->
-      {% comment %}
-      <nav class="col-md-2 bg-light p-3 border-end">
-        <ul class="nav flex-column">
-          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">🏠 Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'kardex' %}">📚 Kardex</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'horario' %}">🕒 Horario</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'pagos' %}">💳 Pagos</a></li>
-          <li class="nav-item mt-3"><a class="nav-link text-danger" href="{% url 'logout' %}">🚪 Cerrar sesión</a></li>
-        </ul>
-      </nav>
-      {% endcomment %}
     </div>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'js/modals.js' %}"></script>
