@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 from decouple import config
 import os
+import sys
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -169,3 +170,12 @@ DATABASE_ROUTERS = ['api.dbrouters.auth_router.AuthRouter']
 SII_API_URL = config('SII_API_URL', default='http://localhost:8001/api/alumnos/')
 AULA_API_URL = config('AULA_API_URL', default='http://localhost:8002/api/')
 
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'test_db.sqlite3',
+    }
+    DATABASES['auth'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'test_auth.sqlite3',
+    }
