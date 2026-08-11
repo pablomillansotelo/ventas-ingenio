@@ -10,14 +10,9 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 @login_required
 def carrito_view(request):
-    productos = Producto.objects.all()
-    form_venta = AddVentaForm()
-    form_add_venta_detalle = AddVentaDetalleForm()
-
     context = {
-        'form_venta': form_venta,
-        'form_add_venta_detalle': form_add_venta_detalle,
-        #'form_editar_venta': form_editar_venta,
+        'form_venta': AddVentaForm(),
+        'form_add_venta_detalle': AddVentaDetalleForm(),
     }
     return render(request, 'ventas/carrito.html', context)
 

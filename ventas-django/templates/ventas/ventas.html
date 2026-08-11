@@ -14,13 +14,11 @@
                 <input type="hidden" id="id_venta_editar" name="id_venta_editar">
                 <div class="modal-body bg-dark text-white">
                     {% for field in form_editar_venta %}
-                    {% if field.name != 'id_venta' %}
                     <p>{{ field.label }}<br>
                         {{ field }}</p>
                     {% for error in field.errors %}
                     <p class="alarma">{{ error }}</p>
                     {% endfor %}
-                    {% endif %}
                     {% endfor %}
                     {% for error in form_editar_venta.non_field_errors %}
                     <p class="alarma">{{ error }}</p>

@@ -16,13 +16,11 @@
                 {% csrf_token %}
                 <div class="modal-body bg-dark text-white">
                     {% for field in form_producto %}
-                    {% if field.name != 'id_producto' %}
                     <p>{{ field.label }}<br>
                         {{ field|add_class:"form-control text-dark" }}</p>
                     {% for error in field.errors %}
                     <p class="alarma">{{ error }}</p>
                     {% endfor %}
-                    {% endif %}
                     {% endfor %}
                     {% for error in form_producto.non_field_errors %}
                     <p class="alarma">{{ error }}</p>
@@ -49,13 +47,11 @@
                 <input type="hidden" id="id_producto_editar" name="id_producto_editar">
                 <div class="modal-body bg-dark text-white">
                     {% for field in form_editar_producto %}
-                    {% if field.name != 'id_producto' %}
                     <p>{{ field.label }}<br>
                         {{ field|add_class:"form-control" }}</p>
                     {% for error in field.errors %}
                     <p class="alarma">{{ error }}</p>
                     {% endfor %}
-                    {% endif %}
                     {% endfor %}
                     {% for error in form_editar_producto.non_field_errors %}
                     <p class="alarma">{{ error }}</p>
