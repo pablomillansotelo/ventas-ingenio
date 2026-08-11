@@ -9,7 +9,10 @@ python-decouple==3.8
 sqlparse==0.4.4
 typing_extensions==4.9.0
 whitenoise==6.9.0
+<<<<<<< HEAD
 django-widget-tweaks==1.5.1
 setuptools>=69.0.0
+=======
+>>>>>>> origin/cursor/ui-redesign-sidebar-2e74
 djangorestframework==3.14.0
 requests==2.31.0

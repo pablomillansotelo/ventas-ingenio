@@ -1,0 +1,5 @@
+{% if messages %}
+<script id="django-messages-data" type="application/json">
+[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+{% endif %}

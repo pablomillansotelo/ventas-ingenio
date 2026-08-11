@@ -1,147 +1,127 @@
 {% extends "base.html" %}
 
-{% load static %}
-{% load widget_tweaks %}
+{% block title %}Inventario — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Catálogos / Inventario{% endblock %}
 
 {% block content %}
-
-<div id="AgregarPersonalModal" class="modal fade" tabindex="-1" aria-labelledby="AgregarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="AgregarProductoModalLabel">Agregar producto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="POST" action="{% url 'AddProducto' %}">
-                {% csrf_token %}
-                <div class="modal-body bg-dark text-white">
-                    {% for field in form_producto %}
-                    <p>{{ field.label }}<br>
-                        {{ field|add_class:"form-control text-dark" }}</p>
-                    {% for error in field.errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                    {% endfor %}
-                    {% for error in form_producto.non_field_errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer bg-dark">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Agregar</button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Inventario</h1>
+    <p class="page-subtitle">Productos disponibles para venta</p>
+  </div>
+  <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#modalAgregarProducto">
+    <i class="bi bi-plus-lg me-1"></i> Nuevo producto
+  </button>
 </div>
 
-<div id="EditarPersonalModal" class="modal fade" tabindex="-1" aria-labelledby="EditarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="EditarProductoModalLabel">Editar producto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="POST" action="{% url 'EditProducto' %}">
-                {% csrf_token %}
-                <input type="hidden" id="id_producto_editar" name="id_producto_editar">
-                <div class="modal-body bg-dark text-white">
-                    {% for field in form_editar_producto %}
-                    <p>{{ field.label }}<br>
-                        {{ field|add_class:"form-control" }}</p>
-                    {% for error in field.errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                    {% endfor %}
-                    {% for error in form_editar_producto.non_field_errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer bg-dark text-white">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
-                    <button type="submit" class="btn btn-success">Aceptar</button>
-                </div>
-            </form>
-        </div>
+<div class="card-app">
+  <div class="card-app-body p-0">
+    <div class="table-responsive-app">
+      <table class="table table-app mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th class="text-end">Precio unitario</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in Productos %}
+          <tr>
+            <td><span class="text-muted">#{{ p.id_producto }}</span></td>
+            <td class="fw-medium">{{ p.producto }}</td>
+            <td class="text-end">${{ p.precio_unitario|floatformat:2 }}</td>
+            <td class="text-end">
+              <div class="gap-actions justify-content-end">
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarProducto('{{ p.id_producto }}','{{ p.producto|escapejs }}','{{ p.precio_unitario }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarProducto" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-icon-delete"
+                  onclick="eliminarProductoInventario('{{ p.id_producto }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEliminarProducto" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="text-center text-muted py-5">No hay productos registrados</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
-<div id="EliminarProductoModal" class="modal fade" tabindex="-1" aria-labelledby="EliminarProductoModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="EliminarProductoModalLabel">Eliminar producto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <form method="POST" action="{% url 'DeleteProducto' %}">
-                {% csrf_token %}
-                <input type="hidden" id="id_producto_eliminar" name="id_producto_eliminar">
-                <div class="modal-body bg-dark text-white">
-                    <p class="labelmodal">¿Estás seguro?</p>
-                </div>
-                <div class="modal-footer bg-dark text-white">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
-                    <button type="submit" class="btn btn-success">Aceptar</button>
-                </div>
-            </form>
+<div class="modal fade modal-app" id="modalAgregarProducto" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'AddProducto' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
+        <div class="modal-body">
+          {% include "includes/form_fields.html" with form=form_producto %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-brand">Guardar</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <h3 class="text-center">Inventario</h3>
-        <div class="col-md-3 pb-2">
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AgregarPersonalModal">
-                Agregar Producto
-                <i class="bi bi-plus-circle"></i>
-            </button>
+<div class="modal fade modal-app" id="modalEditarProducto" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'EditProducto' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_producto_editar" name="id_producto_editar">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="card card-body" style="overflow:scroll">
-            <table class="table table-hover table-primary">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Producto</th>
-                        <th>Precio Unitario</th>
-                        <th>Opciones</th>
-                    </tr>
-                </thead>
-                <tbody class="text-dark">
-                    {% for i in Productos %}
-                    <tr>
-                        <td>{{ i.id_producto }}</td>
-                        <td>{{ i.producto }}</td>
-                        <td>{{ i.precio_unitario }}</td>
-                        <td>
-                            <button type="button"
-                                onclick="editarProducto('{{ i.id_producto }}','{{ i.producto|escapejs }}', '{{ i.precio_unitario }}')"
-                                class="btn btn-outline-dark btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#EditarPersonalModal"
-                                title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button type="button"
-                                onclick="eliminarProductoInventario('{{ i.id_producto }}')"
-                                class="btn btn-outline-danger btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#EliminarProductoModal"
-                                title="Eliminar">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="modal-body">
+          {% include "includes/form_fields.html" with form=form_editar_producto %}
         </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-brand">Actualizar</button>
+        </div>
+      </form>
     </div>
+  </div>
 </div>
 
-{% if messages %}
-<script id="django-messages-data" type="application/json">
-[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
-</script>
-{% endif %}
+<div class="modal fade modal-app" id="modalEliminarProducto" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'DeleteProducto' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_producto_eliminar" name="id_producto_eliminar">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0 text-muted">¿Confirmas que deseas eliminar este producto?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "includes/messages.html" %}
 {% endblock %}

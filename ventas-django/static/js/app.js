@@ -1,8 +1,6 @@
 function setFieldValue(id, value) {
     const el = document.getElementById(id);
-    if (el) {
-        el.value = value ?? '';
-    }
+    if (el) el.value = value ?? '';
 }
 
 function editarPersonal(id, nombre, apellidos, direccion, email, telefono) {
@@ -39,21 +37,39 @@ function eliminarVenta(idVenta) {
 }
 
 function showMessages(messages) {
-    if (typeof Swal === 'undefined' || !messages || !messages.length) {
-        return;
-    }
-    messages.forEach(function (message) {
-        Swal.fire({ text: message });
+    if (!messages?.length || typeof Swal === 'undefined') return;
+    messages.forEach((msg) => Swal.fire({ text: msg, icon: 'info', confirmButtonColor: '#c0392b' }));
+}
+
+function initSidebar() {
+    const sidebar = document.getElementById('appSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    const toggle = document.getElementById('sidebarToggle');
+    if (!sidebar || !toggle) return;
+
+    const close = () => {
+        sidebar.classList.remove('show');
+        backdrop?.classList.remove('show');
+    };
+
+    toggle.addEventListener('click', () => {
+        sidebar.classList.toggle('show');
+        backdrop?.classList.toggle('show');
+    });
+
+    backdrop?.addEventListener('click', close);
+    sidebar.querySelectorAll('.sidebar-link').forEach((link) => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 992) close();
+        });
     });
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', () => {
+    initSidebar();
     const data = document.getElementById('django-messages-data');
     if (data) {
-        try {
-            showMessages(JSON.parse(data.textContent));
-        } catch (e) {
-            console.error('No se pudieron mostrar los mensajes Django', e);
-        }
+        try { showMessages(JSON.parse(data.textContent)); }
+        catch (e) { console.error('Error al mostrar mensajes', e); }
     }
 });
