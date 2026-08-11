@@ -10,14 +10,9 @@ from django.contrib.auth.decorators import login_required
 # Create your views here.
 @login_required
 def carrito_view(request):
-    productos = Producto.objects.all()
-    form_venta = AddVentaForm
-    form_add_venta_detalle = AddVentaDetalleForm
-
     context = {
-        'form_venta': form_venta,
-        'form_add_venta_detalle': form_add_venta_detalle,
-        #'form_editar_venta': form_editar_venta,
+        'form_venta': AddVentaForm(),
+        'form_add_venta_detalle': AddVentaDetalleForm(),
     }
     return render(request, 'ventas/carrito.html', context)
 
@@ -63,7 +58,7 @@ def ventas_view(request):
     ventas = Venta.objects.select_related('id_cliente').prefetch_related(
         'ventadetalle_set__id_producto'
     ).all()
-    form_editar_venta = EditarVentaForm
+    form_editar_venta = EditarVentaForm()
     context = {
         'Ventas': ventas,
         'form_editar_venta': form_editar_venta,
@@ -73,26 +68,38 @@ def ventas_view(request):
 @login_required
 def edit_venta_view(request):
     if request.method == "POST":
-        cliente_id = request.POST.get('id_personal_editar')
+        venta_id = request.POST.get('id_venta_editar') or request.POST.get('id_venta')
+        if not venta_id:
+            messages.error(request, 'Venta no especificada')
+            return redirect('Ventas')
+
+        try:
+            venta = Venta.objects.get(pk=venta_id)
+        except Venta.DoesNotExist:
+            messages.error(request, 'Venta no encontrada')
+            return redirect('Ventas')
+
+        cliente_id = request.POST.get('id_cliente')
         if cliente_id:
             try:
-                cliente = Cliente.objects.get(pk=cliente_id)
-                cliente.nombre = request.POST.get('nombre', cliente.nombre)
-                cliente.apellidos = request.POST.get('apellidos', cliente.apellidos)
-                cliente.direccion = request.POST.get('direccion', cliente.direccion)
-                cliente.email = request.POST.get('email', cliente.email)
-                cliente.telefono = request.POST.get('telefono', cliente.telefono)
-                cliente.save()
-                messages.success(request, 'El cliente ha sido modificado')
+                venta.id_cliente = Cliente.objects.get(pk=cliente_id)
             except Cliente.DoesNotExist:
                 messages.error(request, 'Cliente no encontrado')
+                return redirect('Ventas')
+
+        fecha = request.POST.get('fecha')
+        if fecha:
+            venta.fecha = fecha
+
+        venta.save()
+        messages.success(request, 'La venta ha sido modificada')
     return redirect('Ventas')
 
 @login_required
 def clientes_view(request):
     clientes = Cliente.objects.all()
-    form_cliente = AddClienteForm
-    form_editar_cliente = EditarClienteForm
+    form_cliente = AddClienteForm()
+    form_editar_cliente = EditarClienteForm()
     context = {
         'Clientes': clientes,
         'form_cliente': form_cliente,
@@ -157,8 +164,8 @@ def delete_clientes_view(request):
 @login_required
 def inventario_view(request):
     productos = Producto.objects.all()
-    form_producto = AddProductoForm
-    form_editar_producto = EditarProductoForm
+    form_producto = AddProductoForm()
+    form_editar_producto = EditarProductoForm()
     context = {
         'Productos': productos,
         'form_producto': form_producto,

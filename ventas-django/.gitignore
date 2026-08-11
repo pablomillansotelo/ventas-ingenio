@@ -7,6 +7,9 @@ media
 
 # Environments 
 .env 
+.env.bak/
+test_db.sqlite3
+test_auth.sqlite3
 .venv 
 env/ 
 venv/ 

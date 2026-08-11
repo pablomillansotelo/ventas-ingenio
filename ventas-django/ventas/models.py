@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 
 # Create your models here.
 
@@ -41,6 +42,19 @@ class Venta(models.Model):
 
     def __str__(self):
         return str(self.id_venta)
+
+    @property
+    def cliente(self):
+        return f"{self.id_cliente.nombre} {self.id_cliente.apellidos}"
+
+    @property
+    def monto(self):
+        total = Decimal("0")
+        for detalle in self.ventadetalle_set.all():
+            subtotal = Decimal(detalle.cantidad) * detalle.id_producto.precio_unitario
+            descuento = detalle.descuento or Decimal("0")
+            total += subtotal - descuento
+        return total
 
 class VentaDetalle(models.Model):
     id_venta_det = models.AutoField(primary_key=True)  

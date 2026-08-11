@@ -2,13 +2,13 @@
 {% load static %}
 {% block content %}
 
-<div class="container mt-5 pt-5">
+<div class="container">
     <div class="row">
         <div class="col-md-12">
             <!-- Datos de la factura -->
             <div class="card card-secondary">
                 <div class="card-header">
-                    <h6 class="card-title"><i class="fas fa-shopping-cart"></i> Datos de la factura</h6>
+                    <h6 class="card-title"><i class="bi bi-cart"></i> Datos de la factura</h6>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -25,7 +25,7 @@
             <div class="mt-4">
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="card-title"><i class="fas fa-shopping-cart"></i> Agregar Producto</h6>
+                        <h6 class="card-title"><i class="bi bi-cart-plus"></i> Agregar Producto</h6>
                     </div>
                     <form id="formAddProducto" onsubmit="event.preventDefault(); agregarProducto();">
                         <div class="card-body">
@@ -52,7 +52,7 @@
                             <div class="mt-4">
                                 <button type="submit" class="btn btn-success">
                                     Agregar Producto
-                                    <i class="fas fa-plus-circle"></i>
+                                    <i class="bi bi-plus-circle"></i>
                                 </button>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
             <div class="row mt-4">
                 <button onclick="pagar_carrito()" type="button" class="btn btn-success">
                     Pagar carrito
-                    <i class="fas fa-plus-circle"></i>
+                    <i class="bi bi-plus-circle"></i>
                 </button>
             </div>
         </div>
@@ -103,9 +103,9 @@ function agregarProducto() {
     renderCarrito();
 
     // Limpia los campos
-    document.getElementById('id_producto').selectedIndex = 0;
-    document.getElementById('id_cantidad').value = '';
-    document.getElementById('id_descuento').value = '';
+    document.getElementById('id_producto_add').selectedIndex = 0;
+    document.getElementById('cantidad_add').value = '';
+    document.getElementById('descuento_add').value = '';
 }
 
 function renderCarrito() {
@@ -116,12 +116,12 @@ function renderCarrito() {
             <td>${item.nombre_producto}</td>
             <td>${item.cantidad}</td>
             <td>${item.descuento || ''}</td>
-            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarProducto(${idx})">Eliminar</button></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarItemCarrito(${idx})">Eliminar</button></td>
         </tr>`;
     });
 }
 
-function eliminarProducto(idx) {
+function eliminarItemCarrito(idx) {
     carrito.splice(idx, 1);
     renderCarrito();
 }
@@ -162,12 +162,8 @@ function pagar_carrito() {
 </script>
 
 {% if messages %}
-{% for message in messages %}
-<script>
-    Swal.fire({
-        text: "{{message}}",
-    })
+<script id="django-messages-data" type="application/json">
+[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
 </script>
-{% endfor %}
 {% endif %}
 {% endblock %}
