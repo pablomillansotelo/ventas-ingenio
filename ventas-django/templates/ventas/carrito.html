@@ -103,9 +103,9 @@ function agregarProducto() {
     renderCarrito();
 
     // Limpia los campos
-    document.getElementById('id_producto').selectedIndex = 0;
-    document.getElementById('id_cantidad').value = '';
-    document.getElementById('id_descuento').value = '';
+    document.getElementById('id_producto_add').selectedIndex = 0;
+    document.getElementById('cantidad_add').value = '';
+    document.getElementById('descuento_add').value = '';
 }
 
 function renderCarrito() {
@@ -116,12 +116,12 @@ function renderCarrito() {
             <td>${item.nombre_producto}</td>
             <td>${item.cantidad}</td>
             <td>${item.descuento || ''}</td>
-            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarProducto(${idx})">Eliminar</button></td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarItemCarrito(${idx})">Eliminar</button></td>
         </tr>`;
     });
 }
 
-function eliminarProducto(idx) {
+function eliminarItemCarrito(idx) {
     carrito.splice(idx, 1);
     renderCarrito();
 }
@@ -162,12 +162,8 @@ function pagar_carrito() {
 </script>
 
 {% if messages %}
-{% for message in messages %}
-<script>
-    Swal.fire({
-        text: "{{message}}",
-    })
+<script id="django-messages-data" type="application/json">
+[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
 </script>
-{% endfor %}
 {% endif %}
 {% endblock %}

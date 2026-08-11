@@ -11,8 +11,8 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def carrito_view(request):
     productos = Producto.objects.all()
-    form_venta = AddVentaForm
-    form_add_venta_detalle = AddVentaDetalleForm
+    form_venta = AddVentaForm()
+    form_add_venta_detalle = AddVentaDetalleForm()
 
     context = {
         'form_venta': form_venta,
@@ -103,8 +103,8 @@ def edit_venta_view(request):
 @login_required
 def clientes_view(request):
     clientes = Cliente.objects.all()
-    form_cliente = AddClienteForm
-    form_editar_cliente = EditarClienteForm
+    form_cliente = AddClienteForm()
+    form_editar_cliente = EditarClienteForm()
     context = {
         'Clientes': clientes,
         'form_cliente': form_cliente,
@@ -169,8 +169,8 @@ def delete_clientes_view(request):
 @login_required
 def inventario_view(request):
     productos = Producto.objects.all()
-    form_producto = AddProductoForm
-    form_editar_producto = EditarProductoForm
+    form_producto = AddProductoForm()
+    form_editar_producto = EditarProductoForm()
     context = {
         'Productos': productos,
         'form_producto': form_producto,

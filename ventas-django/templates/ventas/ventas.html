@@ -1,107 +1,73 @@
-{%  extends "base.html" %}
+{% extends "base.html" %}
 {% load static %}
 {% block content %}
 
-
-<div id="EditarVentaModal" class="modal">
+<div id="EditarVentaModal" class="modal fade" tabindex="-1" aria-labelledby="EditarVentaModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark">Editar Venta</h5>
+                <h5 class="modal-title text-dark" id="EditarVentaModalLabel">Editar Venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body bg-dark text-white">
-                <form method="POST" action="{% url 'EditVenta' %}" enctype="multipart/form-data"> {% csrf_token %}
-                    <input type="hidden" id="id_venta_editar" name="id_venta_editar">
-
+            <form method="POST" action="{% url 'EditVenta' %}">
+                {% csrf_token %}
+                <input type="hidden" id="id_venta_editar" name="id_venta_editar">
+                <div class="modal-body bg-dark text-white">
                     {% for field in form_editar_venta %}
                     {% if field.name != 'id_venta' %}
-                    <p> {{field.label}} <br>
-                        {{field}}</p>
+                    <p>{{ field.label }}<br>
+                        {{ field }}</p>
                     {% for error in field.errors %}
-
-                    <p class="alarma">{{error}}</p>
+                    <p class="alarma">{{ error }}</p>
                     {% endfor %}
                     {% endif %}
                     {% endfor %}
                     {% for error in form_editar_venta.non_field_errors %}
-                    <p class="alarma">{{error}}</p>
+                    <p class="alarma">{{ error }}</p>
                     {% endfor %}
-            </div>
-            <div class="modal-footer bg-dark text-white">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">
-                   Volver
-                </button>
-                <button type="submit" class="btn btn-success">
-                    Aceptar
-                </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-<div id="VerVentaModal" class="modal" style="overflow: scroll;">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark">Ver venta</h5>
-            </div>
-            <div class="modal-body bg-dark text-white">
-                <form method="POST" action="{% url 'AddProducto' %}" enctype="multipart/form-data"> {% csrf_token %}
-
-            </div>
-            <div class="modal-footer bg-dark">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">
-                    Cancelar
-                </button>
-                <button type="submit" class="btn btn-success">
-                    Agregar
-                </button>
-            </div>
+                </div>
+                <div class="modal-footer bg-dark text-white">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
+                    <button type="submit" class="btn btn-success">Aceptar</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 
-<div id="EliminarVentaModal" class="modal">
+<div id="EliminarVentaModal" class="modal fade" tabindex="-1" aria-labelledby="EliminarVentaModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark">Eliminar</h5>
+                <h5 class="modal-title text-dark" id="EliminarVentaModalLabel">Eliminar venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
-            <div class="modal-body bg-dark text-white">
-                <p class="labelmodal">¿Estás seguro?</p>
-                <form method="POST" action="{% url 'DeleteVenta' %}">{% csrf_token %}
-                    <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
-            </div>
-            <div class="modal-footer bg-dark text-white">
-                <button type="button" class="btn btn-danger" data-dismiss="modal">
-                   Volver
-                </button>
-                <button type="submit" class="btn btn-success">
-                    Aceptar
-                </button>
-                </form>
-            </div>
+            <form method="POST" action="{% url 'DeleteVenta' %}">
+                {% csrf_token %}
+                <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
+                <div class="modal-body bg-dark text-white">
+                    <p class="labelmodal">¿Estás seguro?</p>
+                </div>
+                <div class="modal-footer bg-dark text-white">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
+                    <button type="submit" class="btn btn-success">Aceptar</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-12">
-        <h3 class="text-center">Ventas   </h3>
+        <h3 class="text-center">Ventas</h3>
         <div class="col-md-3 pb-2">
-            <a href="{%  url "Carrito" %}" class="nav-link">
-                <button type="button" class="btn btn-success">
-                    Crear venta
-                    <i class="fas fa-plus-circle"></i>
-                </button>
+            <a href="{% url 'Carrito' %}" class="btn btn-success">
+                Crear venta
+                <i class="bi bi-plus-circle"></i>
             </a>
         </div>
         <div class="card card-body" style="overflow:scroll">
-            <table class="table table-hover table-primary" >
+            <table class="table table-hover table-primary">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -119,15 +85,22 @@
                         <td>{{ i.fecha }}</td>
                         <td>{{ i.monto|floatformat:2 }}</td>
                         <td>
-                            <button onclick="editarPersonal('{{ i.id_cliente }}','{{ i.nombre }}', '{{ i.apellidos }}', '{{ i.direccion }}', '{{ i.email }}', '{{ i.telefono }}')" class="btn btn-dark-outline btn-sm" data-toggle="modal"
-                                href="#VerVentaModal"><img src="{% static 'index/img/chart.png' %}" alt="Error"
-                                    width="30"></button>
-                            <button onclick="editarVenta('{{ i.id_venta }}', '{{ i.id_cliente_id }}', '{{ i.fecha|date:"Y-m-d" }}')" class="btn btn-dark-outline btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#EditarVentaModal"><img src="{% static 'index/img/editar.png' %}" alt="Editar"
-                                    width="30"></button>
-                            <button onclick="eliminarVenta('{{ i.id_venta }}')" class="btn btn-dark-outline btn-sm"
-                                data-bs-toggle="modal" data-bs-target="#EliminarVentaModal"><img
-                                    src="{% static 'index/img/delete.png' %}" alt="Eliminar" width="30"></button>
+                            <button type="button"
+                                onclick="editarVenta('{{ i.id_venta }}', '{{ i.id_cliente_id }}', '{{ i.fecha|date:"Y-m-d" }}')"
+                                class="btn btn-outline-dark btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#EditarVentaModal"
+                                title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button"
+                                onclick="eliminarVenta('{{ i.id_venta }}')"
+                                class="btn btn-outline-danger btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#EliminarVentaModal"
+                                title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -136,31 +109,10 @@
         </div>
     </div>
 </div>
-<script>
-function editarVenta(idVenta, idCliente, fecha) {
-    document.getElementById('id_venta_editar').value = idVenta;
-    const clienteSelect = document.getElementById('id_cliente_editar');
-    if (clienteSelect) {
-        clienteSelect.value = idCliente;
-    }
-    const fechaInput = document.getElementById('fecha_editar');
-    if (fechaInput) {
-        fechaInput.value = fecha;
-    }
-}
-
-function eliminarVenta(idVenta) {
-    document.getElementById('id_venta_eliminar').value = idVenta;
-}
-</script>
 
 {% if messages %}
-{% for message in messages %}
-<script>
-    Swal.fire({
-        text: "{{message}}",
-    })
+<script id="django-messages-data" type="application/json">
+[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
 </script>
-{% endfor %}
 {% endif %}
 {% endblock %}

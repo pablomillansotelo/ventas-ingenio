@@ -65,7 +65,7 @@ class EditarProductoForm(forms.ModelForm):
         widgets = {
             'id_producto': forms.TextInput(attrs={'type': 'text', 'id': 'id_producto_editar'}),
             'producto': forms.TextInput(attrs={'type': 'text', 'id': 'producto_editar'}),
-            'precio_producto': forms.NumberInput(attrs={'type': 'number', 'id': 'precio_unitario_editar'}),
+            'precio_unitario': forms.NumberInput(attrs={'type': 'number', 'step': '0.01', 'id': 'precio_unitario_editar'}),
         }
 
 
