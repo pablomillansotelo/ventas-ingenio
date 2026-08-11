@@ -1,6 +1,8 @@
-from django import forms
-from ventas.models import Cliente, Producto, Venta, VentaDetalle
 from datetime import date
+
+from django import forms
+
+from ventas.models import Cliente, Curso, Venta, VentaDetalle
 
 INPUT = 'form-control'
 SELECT = 'form-select'
@@ -10,13 +12,15 @@ class AddClienteForm(forms.ModelForm):
 
     class Meta:
         model = Cliente
-        fields = ('nombre', 'apellidos', 'direccion', 'email', 'telefono')
+        fields = ('nombre', 'apellidos', 'direccion', 'email', 'telefono', 'curp', 'empresa')
         labels = {
             'nombre': 'Nombre',
             'apellidos': 'Apellidos',
             'direccion': 'Dirección',
             'email': 'Correo electrónico',
             'telefono': 'Teléfono',
+            'curp': 'CURP',
+            'empresa': 'Empresa',
         }
         widgets = {
             'nombre': forms.TextInput(attrs={'class': INPUT, 'placeholder': 'Nombre'}),
@@ -24,6 +28,8 @@ class AddClienteForm(forms.ModelForm):
             'direccion': forms.TextInput(attrs={'class': INPUT, 'placeholder': 'Dirección'}),
             'email': forms.EmailInput(attrs={'class': INPUT, 'placeholder': 'correo@ejemplo.com'}),
             'telefono': forms.TextInput(attrs={'class': INPUT, 'placeholder': '5551234567'}),
+            'curp': forms.TextInput(attrs={'class': INPUT}),
+            'empresa': forms.TextInput(attrs={'class': INPUT}),
         }
 
 
@@ -31,7 +37,7 @@ class EditarClienteForm(forms.ModelForm):
 
     class Meta:
         model = Cliente
-        fields = ('nombre', 'apellidos', 'direccion', 'email', 'telefono')
+        fields = AddClienteForm.Meta.fields
         labels = AddClienteForm.Meta.labels
         widgets = {
             'nombre': forms.TextInput(attrs={'class': INPUT, 'id': 'nombre_editar'}),
@@ -39,33 +45,50 @@ class EditarClienteForm(forms.ModelForm):
             'direccion': forms.TextInput(attrs={'class': INPUT, 'id': 'direccion_editar'}),
             'email': forms.EmailInput(attrs={'class': INPUT, 'id': 'email_editar'}),
             'telefono': forms.TextInput(attrs={'class': INPUT, 'id': 'telefono_editar'}),
+            'curp': forms.TextInput(attrs={'class': INPUT, 'id': 'curp_editar'}),
+            'empresa': forms.TextInput(attrs={'class': INPUT, 'id': 'empresa_editar'}),
         }
 
 
-class AddProductoForm(forms.ModelForm):
+class AddCursoForm(forms.ModelForm):
 
     class Meta:
-        model = Producto
-        fields = ('producto', 'precio_unitario')
+        model = Curso
+        fields = ('codigo', 'nombre', 'descripcion', 'duracion_horas', 'modalidad', 'precio_lista', 'activo')
         labels = {
-            'producto': 'Nombre del producto',
-            'precio_unitario': 'Precio unitario',
+            'codigo': 'Código',
+            'nombre': 'Nombre del curso',
+            'descripcion': 'Descripción',
+            'duracion_horas': 'Duración (horas)',
+            'modalidad': 'Modalidad',
+            'precio_lista': 'Precio de lista',
+            'activo': 'Activo',
         }
         widgets = {
-            'producto': forms.TextInput(attrs={'class': INPUT, 'placeholder': 'Ej. Curso de Python'}),
-            'precio_unitario': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'min': '0', 'placeholder': '0.00'}),
+            'codigo': forms.TextInput(attrs={'class': INPUT, 'placeholder': 'PY-101'}),
+            'nombre': forms.TextInput(attrs={'class': INPUT}),
+            'descripcion': forms.Textarea(attrs={'class': INPUT, 'rows': 3}),
+            'duracion_horas': forms.NumberInput(attrs={'class': INPUT, 'min': '1'}),
+            'modalidad': forms.Select(attrs={'class': SELECT}),
+            'precio_lista': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'min': '0'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 
-class EditarProductoForm(forms.ModelForm):
+class EditarCursoForm(forms.ModelForm):
 
     class Meta:
-        model = Producto
-        fields = ('producto', 'precio_unitario')
-        labels = AddProductoForm.Meta.labels
+        model = Curso
+        fields = AddCursoForm.Meta.fields
+        labels = AddCursoForm.Meta.labels
         widgets = {
-            'producto': forms.TextInput(attrs={'class': INPUT, 'id': 'producto_editar'}),
-            'precio_unitario': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'id': 'precio_unitario_editar'}),
+            'codigo': forms.TextInput(attrs={'class': INPUT, 'id': 'codigo_editar'}),
+            'nombre': forms.TextInput(attrs={'class': INPUT, 'id': 'nombre_curso_editar'}),
+            'descripcion': forms.Textarea(attrs={'class': INPUT, 'rows': 3, 'id': 'descripcion_editar'}),
+            'duracion_horas': forms.NumberInput(attrs={'class': INPUT, 'id': 'duracion_horas_editar'}),
+            'modalidad': forms.Select(attrs={'class': SELECT, 'id': 'modalidad_editar'}),
+            'precio_lista': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'id': 'precio_lista_editar'}),
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input', 'id': 'activo_editar'}),
         }
 
 
@@ -73,14 +96,18 @@ class EditarVentaForm(forms.ModelForm):
 
     class Meta:
         model = Venta
-        fields = ('id_cliente', 'fecha')
+        fields = ('id_cliente', 'fecha', 'estado', 'observaciones')
         labels = {
             'id_cliente': 'Cliente',
             'fecha': 'Fecha de venta',
+            'estado': 'Estado',
+            'observaciones': 'Observaciones',
         }
         widgets = {
             'id_cliente': forms.Select(attrs={'class': SELECT, 'id': 'id_cliente_editar'}),
             'fecha': forms.DateInput(format='%Y-%m-%d', attrs={'class': INPUT, 'type': 'date', 'id': 'fecha_editar'}),
+            'estado': forms.Select(attrs={'class': SELECT, 'id': 'estado_editar'}),
+            'observaciones': forms.Textarea(attrs={'class': INPUT, 'rows': 2, 'id': 'observaciones_editar'}),
         }
 
 
@@ -88,29 +115,43 @@ class AddVentaForm(forms.ModelForm):
 
     class Meta:
         model = Venta
-        fields = ('id_cliente', 'fecha')
-        labels = EditarVentaForm.Meta.labels
+        fields = ('id_cliente', 'fecha', 'observaciones')
+        labels = {
+            'id_cliente': 'Cliente',
+            'fecha': 'Fecha de venta',
+            'observaciones': 'Observaciones',
+        }
         widgets = {
             'id_cliente': forms.Select(attrs={'class': SELECT, 'id': 'id_cliente_add'}),
             'fecha': forms.DateInput(
                 format='%Y-%m-%d',
                 attrs={'class': INPUT, 'type': 'date', 'id': 'fecha_add', 'value': date.today().isoformat()},
             ),
+            'observaciones': forms.Textarea(attrs={'class': INPUT, 'rows': 2, 'id': 'observaciones_add'}),
         }
 
 
 class AddVentaDetalleForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['id_curso'].queryset = Curso.objects.filter(activo=True).order_by('nombre')
+        self.fields['cantidad'].initial = 1
+
     class Meta:
         model = VentaDetalle
-        fields = ('id_producto', 'cantidad', 'descuento')
+        fields = ('id_curso', 'cantidad', 'descuento')
         labels = {
-            'id_producto': 'Producto',
-            'cantidad': 'Cantidad',
+            'id_curso': 'Curso',
+            'cantidad': 'Plazas',
             'descuento': 'Descuento ($)',
         }
         widgets = {
-            'id_producto': forms.Select(attrs={'class': SELECT, 'id': 'id_producto_add'}),
+            'id_curso': forms.Select(attrs={'class': SELECT, 'id': 'id_curso_add'}),
             'cantidad': forms.NumberInput(attrs={'class': INPUT, 'min': '1', 'id': 'cantidad_add', 'value': '1'}),
             'descuento': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'min': '0', 'id': 'descuento_add', 'placeholder': '0.00'}),
         }
+
+
+AddProductoForm = AddCursoForm
+EditarProductoForm = EditarCursoForm

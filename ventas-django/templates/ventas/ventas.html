@@ -7,7 +7,7 @@
 <div class="page-header">
   <div>
     <h1 class="page-title">Historial de ventas</h1>
-    <p class="page-subtitle">Consulta y administra las transacciones registradas</p>
+    <p class="page-subtitle">Consulta y administra las ventas de cursos registradas</p>
   </div>
   <a href="{% url 'Carrito' %}" class="btn btn-brand">
     <i class="bi bi-cart-plus me-1"></i> Nueva venta
@@ -22,8 +22,11 @@
           <tr>
             <th>ID</th>
             <th>Cliente</th>
+            <th>Vendedor</th>
             <th>Fecha</th>
-            <th class="text-end">Monto</th>
+            <th class="text-center">Cursos</th>
+            <th class="text-end">Total</th>
+            <th>Estado</th>
             <th class="text-end">Acciones</th>
           </tr>
         </thead>
@@ -32,12 +35,19 @@
           <tr>
             <td><span class="text-muted">#{{ v.id_venta }}</span></td>
             <td class="fw-medium">{{ v.cliente }}</td>
+            <td>{{ v.vendedor_nombre }}</td>
             <td>{{ v.fecha|date:"d/m/Y" }}</td>
+            <td class="text-center">{{ v.ventadetalle_set.count }}</td>
             <td class="text-end fw-semibold">${{ v.monto|floatformat:2 }}</td>
+            <td>{{ v.get_estado_display }}</td>
             <td class="text-end">
               <div class="gap-actions justify-content-end">
                 <button type="button" class="btn btn-icon btn-icon-edit"
-                  onclick="editarVenta('{{ v.id_venta }}','{{ v.id_cliente_id }}','{{ v.fecha|date:"Y-m-d" }}')"
+                  data-bs-toggle="modal" data-bs-target="#detalleVenta{{ v.id_venta }}" title="Ver detalle">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarVenta('{{ v.id_venta }}','{{ v.id_cliente_id }}','{{ v.fecha|date:"Y-m-d" }}','{{ v.estado }}','{{ v.observaciones|escapejs }}')"
                   data-bs-toggle="modal" data-bs-target="#modalEditarVenta" title="Editar">
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -51,7 +61,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="5" class="text-center text-muted py-5">No hay ventas registradas</td>
+            <td colspan="8" class="text-center text-muted py-5">No hay ventas registradas</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -59,6 +69,58 @@
     </div>
   </div>
 </div>
+
+{% for v in Ventas %}
+<div class="modal fade modal-app" id="detalleVenta{{ v.id_venta }}" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Venta #{{ v.id_venta }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2 mb-3 small">
+          <div class="col-md-6"><strong>Cliente:</strong> {{ v.cliente }}</div>
+          <div class="col-md-6"><strong>Vendedor:</strong> {{ v.vendedor_nombre }}</div>
+          <div class="col-md-6"><strong>Fecha:</strong> {{ v.fecha|date:"d/m/Y" }}</div>
+          <div class="col-md-6"><strong>Estado:</strong> {{ v.get_estado_display }}</div>
+          {% if v.observaciones %}
+          <div class="col-12"><strong>Observaciones:</strong> {{ v.observaciones }}</div>
+          {% endif %}
+        </div>
+        <table class="table table-app table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Curso</th>
+              <th class="text-center">Plazas</th>
+              <th class="text-end">Precio</th>
+              <th class="text-end">Descuento</th>
+              <th class="text-end">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in v.ventadetalle_set.all %}
+            <tr>
+              <td>{{ d.id_curso.nombre }}</td>
+              <td class="text-center">{{ d.cantidad }}</td>
+              <td class="text-end">${{ d.precio_aplicado|floatformat:2 }}</td>
+              <td class="text-end">{% if d.descuento %}${{ d.descuento|floatformat:2 }}{% else %}—{% endif %}</td>
+              <td class="text-end">${{ d.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th colspan="4" class="text-end">Total</th>
+              <th class="text-end">${{ v.monto|floatformat:2 }}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
 
 <div class="modal fade modal-app" id="modalEditarVenta" tabindex="-1">
   <div class="modal-dialog">
@@ -93,7 +155,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <p class="mb-0 text-muted">¿Confirmas que deseas eliminar esta venta y su detalle?</p>
+          <p class="mb-0 text-muted">¿Confirmas que deseas eliminar esta venta y sus cursos?</p>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>

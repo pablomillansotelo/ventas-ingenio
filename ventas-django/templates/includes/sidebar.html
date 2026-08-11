@@ -22,8 +22,8 @@
     <a class="sidebar-link{% if current == 'Clientes' %} active{% endif %}" href="{% url 'Clientes' %}">
       <i class="bi bi-people"></i> Clientes
     </a>
-    <a class="sidebar-link{% if current == 'Inventario' %} active{% endif %}" href="{% url 'Inventario' %}">
-      <i class="bi bi-box-seam"></i> Inventario
+    <a class="sidebar-link{% if current == 'Cursos' or current == 'Inventario' %} active{% endif %}" href="{% url 'Cursos' %}">
+      <i class="bi bi-journal-bookmark"></i> Cursos
     </a>
   </nav>
 

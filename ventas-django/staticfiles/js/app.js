@@ -3,33 +3,47 @@ function setFieldValue(id, value) {
     if (el) el.value = value ?? '';
 }
 
-function editarPersonal(id, nombre, apellidos, direccion, email, telefono) {
+function setCheckboxValue(id, checked) {
+    const el = document.getElementById(id);
+    if (el) el.checked = checked === true || checked === 'true';
+}
+
+function editarPersonal(id, nombre, apellidos, direccion, email, telefono, curp, empresa) {
     setFieldValue('id_personal_editar', id);
     setFieldValue('nombre_editar', nombre);
     setFieldValue('apellidos_editar', apellidos);
     setFieldValue('direccion_editar', direccion);
     setFieldValue('email_editar', email);
     setFieldValue('telefono_editar', telefono);
+    setFieldValue('curp_editar', curp);
+    setFieldValue('empresa_editar', empresa);
 }
 
 function eliminarPersonal(id) {
     setFieldValue('id_personal_eliminar', id);
 }
 
-function editarProducto(id, producto, precio) {
-    setFieldValue('id_producto_editar', id);
-    setFieldValue('producto_editar', producto);
-    setFieldValue('precio_unitario_editar', precio);
+function editarCurso(id, codigo, nombre, descripcion, duracion, modalidad, precio, activo) {
+    setFieldValue('id_curso_editar', id);
+    setFieldValue('codigo_editar', codigo);
+    setFieldValue('nombre_curso_editar', nombre);
+    setFieldValue('descripcion_editar', descripcion);
+    setFieldValue('duracion_horas_editar', duracion);
+    setFieldValue('modalidad_editar', modalidad);
+    setFieldValue('precio_lista_editar', precio);
+    setCheckboxValue('activo_editar', activo);
 }
 
-function eliminarProductoInventario(id) {
-    setFieldValue('id_producto_eliminar', id);
+function eliminarCurso(id) {
+    setFieldValue('id_curso_eliminar', id);
 }
 
-function editarVenta(idVenta, idCliente, fecha) {
+function editarVenta(idVenta, idCliente, fecha, estado, observaciones) {
     setFieldValue('id_venta_editar', idVenta);
     setFieldValue('id_cliente_editar', idCliente);
     setFieldValue('fecha_editar', fecha);
+    setFieldValue('estado_editar', estado || 'confirmada');
+    setFieldValue('observaciones_editar', observaciones || '');
 }
 
 function eliminarVenta(idVenta) {

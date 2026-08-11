@@ -23,9 +23,9 @@
             <th>ID</th>
             <th>Nombre</th>
             <th>Apellidos</th>
-            <th>Dirección</th>
             <th>Email</th>
             <th>Teléfono</th>
+            <th>Empresa</th>
             <th class="text-end">Acciones</th>
           </tr>
         </thead>
@@ -35,13 +35,13 @@
             <td><span class="text-muted">#{{ c.id_cliente }}</span></td>
             <td class="fw-medium">{{ c.nombre }}</td>
             <td>{{ c.apellidos }}</td>
-            <td>{{ c.direccion }}</td>
             <td>{{ c.email }}</td>
             <td>{{ c.telefono|default:"—" }}</td>
+            <td>{{ c.empresa|default:"—" }}</td>
             <td class="text-end">
               <div class="gap-actions justify-content-end">
                 <button type="button" class="btn btn-icon btn-icon-edit"
-                  onclick="editarPersonal('{{ c.id_cliente }}','{{ c.nombre|escapejs }}','{{ c.apellidos|escapejs }}','{{ c.direccion|escapejs }}','{{ c.email|escapejs }}','{{ c.telefono|escapejs }}')"
+                  onclick="editarPersonal('{{ c.id_cliente }}','{{ c.nombre|escapejs }}','{{ c.apellidos|escapejs }}','{{ c.direccion|escapejs }}','{{ c.email|escapejs }}','{{ c.telefono|escapejs }}','{{ c.curp|default:""|escapejs }}','{{ c.empresa|default:""|escapejs }}')"
                   data-bs-toggle="modal" data-bs-target="#modalEditarCliente" title="Editar">
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -64,7 +64,6 @@
   </div>
 </div>
 
-{# Modal agregar #}
 <div class="modal fade modal-app" id="modalAgregarCliente" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -86,7 +85,6 @@
   </div>
 </div>
 
-{# Modal editar #}
 <div class="modal fade modal-app" id="modalEditarCliente" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -109,7 +107,6 @@
   </div>
 </div>
 
-{# Modal eliminar #}
 <div class="modal fade modal-app" id="modalEliminarCliente" tabindex="-1">
   <div class="modal-dialog modal-sm">
     <div class="modal-content">

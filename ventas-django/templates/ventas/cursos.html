@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Cursos — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Catálogos / Cursos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Catálogo de cursos</h1>
+    <p class="page-subtitle">Administra los cursos disponibles para venta</p>
+  </div>
+  <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#modalAgregarCurso">
+    <i class="bi bi-plus-lg me-1"></i> Nuevo curso
+  </button>
+</div>
+
+<div class="card-app">
+  <div class="card-app-body p-0">
+    <div class="table-responsive-app">
+      <table class="table table-app mb-0">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Curso</th>
+            <th>Modalidad</th>
+            <th class="text-center">Horas</th>
+            <th class="text-end">Precio</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in Cursos %}
+          <tr>
+            <td><span class="text-muted">{{ c.codigo }}</span></td>
+            <td class="fw-medium">{{ c.nombre }}</td>
+            <td>{{ c.get_modalidad_display }}</td>
+            <td class="text-center">{{ c.duracion_horas|default:"—" }}</td>
+            <td class="text-end">${{ c.precio_lista|floatformat:2 }}</td>
+            <td>
+              {% if c.activo %}
+              <span class="badge bg-success-subtle text-success border">Activo</span>
+              {% else %}
+              <span class="badge bg-secondary-subtle text-secondary border">Inactivo</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <div class="gap-actions justify-content-end">
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarCurso('{{ c.id_curso }}','{{ c.codigo|escapejs }}','{{ c.nombre|escapejs }}','{{ c.descripcion|escapejs }}','{{ c.duracion_horas|default:"" }}','{{ c.modalidad }}','{{ c.precio_lista }}','{{ c.activo|yesno:"true,false" }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarCurso" title="Editar">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button type="button" class="btn btn-icon btn-icon-delete"
+                  onclick="eliminarCurso('{{ c.id_curso }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEliminarCurso" title="Eliminar">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-5">No hay cursos registrados</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-app" id="modalAgregarCurso" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'AddCurso' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Nuevo curso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          {% include "includes/form_fields.html" with form=form_curso %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-brand">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-app" id="modalEditarCurso" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'EditCurso' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_curso_editar" name="id_curso_editar">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar curso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          {% include "includes/form_fields.html" with form=form_editar_curso %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-brand">Actualizar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-app" id="modalEliminarCurso" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'DeleteCurso' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_curso_eliminar" name="id_curso_eliminar">
+        <div class="modal-header">
+          <h5 class="modal-title">Eliminar curso</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="mb-0 text-muted">¿Confirmas que deseas eliminar este curso?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Eliminar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% include "includes/messages.html" %}
+{% endblock %}

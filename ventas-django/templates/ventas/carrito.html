@@ -10,22 +10,30 @@
 <div class="page-header">
   <div>
     <h1 class="page-title">Punto de venta</h1>
-    <p class="page-subtitle">Registra una nueva venta seleccionando cliente y productos</p>
+    <p class="page-subtitle">Registra una venta de uno o más cursos</p>
   </div>
+</div>
+
+<div class="alert alert-light border mb-4 py-2 px-3">
+  <i class="bi bi-person-badge me-1"></i> <strong>Vendedor:</strong> {{ vendedor.nombre }}
 </div>
 
 <div class="row g-4">
   <div class="col-lg-4">
     <div class="card-app h-100">
-      <div class="card-app-header"><i class="bi bi-person-badge"></i> Datos de la venta</div>
+      <div class="card-app-header"><i class="bi bi-receipt"></i> Datos de la venta</div>
       <div class="card-app-body">
         <div class="mb-3">
           <label for="id_cliente_add" class="form-label">{{ form_venta.id_cliente.label }}</label>
           {{ form_venta.id_cliente }}
         </div>
-        <div class="mb-0">
+        <div class="mb-3">
           <label for="fecha_add" class="form-label">{{ form_venta.fecha.label }}</label>
           {{ form_venta.fecha }}
+        </div>
+        <div class="mb-0">
+          <label for="observaciones_add" class="form-label">{{ form_venta.observaciones.label }}</label>
+          {{ form_venta.observaciones }}
         </div>
       </div>
     </div>
@@ -33,14 +41,14 @@
 
   <div class="col-lg-8">
     <div class="card-app">
-      <div class="card-app-header"><i class="bi bi-plus-circle"></i> Agregar producto al carrito</div>
+      <div class="card-app-header"><i class="bi bi-journal-plus"></i> Agregar curso</div>
       <div class="card-app-body">
-        <form id="formAddProducto" onsubmit="event.preventDefault(); agregarProducto();">
+        <form id="formAddCurso" onsubmit="event.preventDefault(); agregarCurso();">
           {% csrf_token %}
           <div class="row g-3 align-items-end">
             <div class="col-md-5">
-              <label for="id_producto_add" class="form-label">{{ form_add_venta_detalle.id_producto.label }}</label>
-              {{ form_add_venta_detalle.id_producto }}
+              <label for="id_curso_add" class="form-label">{{ form_add_venta_detalle.id_curso.label }}</label>
+              {{ form_add_venta_detalle.id_curso }}
             </div>
             <div class="col-md-3">
               <label for="cantidad_add" class="form-label">{{ form_add_venta_detalle.cantidad.label }}</label>
@@ -63,18 +71,18 @@
 </div>
 
 <div class="card-app mt-4">
-  <div class="card-app-header"><i class="bi bi-cart3"></i> Carrito</div>
+  <div class="card-app-header"><i class="bi bi-cart3"></i> Carrito de cursos</div>
   <div class="card-app-body p-0">
     <div id="carritoEmpty" class="text-center text-muted py-5">
       <i class="bi bi-cart-x display-6 d-block mb-2 opacity-50"></i>
-      El carrito está vacío. Agrega productos para continuar.
+      El carrito está vacío. Agrega cursos para continuar.
     </div>
     <div class="table-responsive-app">
       <table class="table table-app mb-0" id="tblProducts">
         <thead>
           <tr>
-            <th>Producto</th>
-            <th class="text-center">Cantidad</th>
+            <th>Curso</th>
+            <th class="text-center">Plazas</th>
             <th class="text-end">Descuento</th>
             <th class="text-end">Acción</th>
           </tr>

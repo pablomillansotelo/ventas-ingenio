@@ -1,18 +1,18 @@
 let carrito = [];
 
-function agregarProducto() {
-    const id_producto = document.getElementById('id_producto_add').value;
-    const select = document.getElementById('id_producto_add');
-    const nombre_producto = select.selectedOptions[0]?.text || '';
+function agregarCurso() {
+    const id_curso = document.getElementById('id_curso_add').value;
+    const select = document.getElementById('id_curso_add');
+    const nombre_curso = select.selectedOptions[0]?.text || '';
     const cantidad = document.getElementById('cantidad_add').value;
     const descuento = document.getElementById('descuento_add').value;
 
-    if (!id_producto || !cantidad) {
-        Swal.fire({ text: 'Selecciona un producto y la cantidad.', icon: 'warning', confirmButtonColor: '#c0392b' });
+    if (!id_curso || !cantidad) {
+        Swal.fire({ text: 'Selecciona un curso y las plazas.', icon: 'warning', confirmButtonColor: '#c0392b' });
         return;
     }
 
-    carrito.push({ id_producto, nombre_producto, cantidad, descuento });
+    carrito.push({ id_curso, nombre_curso, cantidad, descuento });
     renderCarrito();
 
     select.selectedIndex = 0;
@@ -34,7 +34,7 @@ function renderCarrito() {
 
     carrito.forEach((item, idx) => {
         tbody.innerHTML += `<tr>
-            <td>${item.nombre_producto}</td>
+            <td>${item.nombre_curso}</td>
             <td class="text-center">${item.cantidad}</td>
             <td class="text-end">${item.descuento ? '$' + item.descuento : '—'}</td>
             <td class="text-end">
@@ -54,9 +54,10 @@ function eliminarItemCarrito(idx) {
 function pagar_carrito() {
     const id_cliente = document.getElementById('id_cliente_add').value;
     const fecha = document.getElementById('fecha_add').value;
+    const observaciones = document.getElementById('observaciones_add').value;
 
     if (!id_cliente || !fecha || carrito.length === 0) {
-        Swal.fire({ text: 'Completa cliente, fecha y al menos un producto.', icon: 'warning', confirmButtonColor: '#c0392b' });
+        Swal.fire({ text: 'Completa cliente, fecha y al menos un curso.', icon: 'warning', confirmButtonColor: '#c0392b' });
         return;
     }
 
@@ -82,11 +83,17 @@ function pagar_carrito() {
     fechaInput.value = fecha;
     form.appendChild(fechaInput);
 
+    const obsInput = document.createElement('input');
+    obsInput.type = 'hidden';
+    obsInput.name = 'observaciones_add';
+    obsInput.value = observaciones;
+    form.appendChild(obsInput);
+
     carrito.forEach((item) => {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'nplainArray[]';
-        input.value = `${item.id_producto},${item.cantidad},${item.descuento}`;
+        input.value = `${item.id_curso},${item.cantidad},${item.descuento}`;
         form.appendChild(input);
     });
 
