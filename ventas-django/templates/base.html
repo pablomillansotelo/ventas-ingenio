@@ -38,8 +38,8 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link text-white{% if current == 'Inventario' %} fw-bold text-decoration-underline{% endif %}" href="{% url 'Inventario' %}">
-                <i class="bi bi-box-seam"></i> Inventario
+              <a class="nav-link text-white{% if current == 'Cursos' or current == 'Inventario' %} fw-bold text-decoration-underline{% endif %}" href="{% url 'Cursos' %}">
+                <i class="bi bi-journal-bookmark"></i> Cursos
               </a>
             </li>
           </ul>
@@ -83,8 +83,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link{% if current == 'Inventario' %} active{% endif %}" href="{% url 'Inventario' %}">
-              <i class="bi bi-box-seam"></i> Inventario
+            <a class="nav-link{% if current == 'Cursos' or current == 'Inventario' %} active{% endif %}" href="{% url 'Cursos' %}">
+              <i class="bi bi-journal-bookmark"></i> Cursos
             </a>
           </li>
           <li class="nav-item mt-3">

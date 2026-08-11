@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<div id="AgregarCursoModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Nuevo curso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'AddCurso' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    {% for field in form_curso %}
+                    <p>{{ field.label }}<br>{{ field|add_class:"form-control" }}</p>
+                    {% for error in field.errors %}<p class="text-danger small">{{ error }}</p>{% endfor %}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="EditarCursoModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Editar curso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'EditCurso' %}">
+                {% csrf_token %}
+                <input type="hidden" id="id_curso_editar" name="id_curso_editar">
+                <div class="modal-body">
+                    {% for field in form_editar_curso %}
+                    <p>{{ field.label }}<br>{{ field|add_class:"form-control" }}</p>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="EliminarCursoModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Eliminar curso</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'DeleteCurso' %}">
+                {% csrf_token %}
+                <input type="hidden" id="id_curso_eliminar" name="id_curso_eliminar">
+                <div class="modal-body"><p>¿Confirmas eliminar este curso?</p></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3 class="text-center">Catalogo de cursos</h3>
+        <div class="col-md-3 pb-2">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#AgregarCursoModal">
+                Nuevo curso <i class="bi bi-plus-circle"></i>
+            </button>
+        </div>
+        <div class="card card-body" style="overflow:scroll">
+            <table class="table table-hover table-primary">
+                <thead>
+                    <tr>
+                        <th>Codigo</th>
+                        <th>Curso</th>
+                        <th>Modalidad</th>
+                        <th>Horas</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                        <th>Opciones</th>
+                    </tr>
+                </thead>
+                <tbody class="text-dark">
+                    {% for c in Cursos %}
+                    <tr>
+                        <td>{{ c.codigo }}</td>
+                        <td>{{ c.nombre }}</td>
+                        <td>{{ c.get_modalidad_display }}</td>
+                        <td>{{ c.duracion_horas|default:"—" }}</td>
+                        <td>${{ c.precio_lista|floatformat:2 }}</td>
+                        <td>{% if c.activo %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-secondary">Inactivo</span>{% endif %}</td>
+                        <td>
+                            <button type="button"
+                                onclick="editarCurso('{{ c.id_curso }}','{{ c.codigo|escapejs }}','{{ c.nombre|escapejs }}','{{ c.descripcion|escapejs }}','{{ c.duracion_horas|default:"" }}','{{ c.modalidad }}','{{ c.precio_lista }}','{{ c.activo|yesno:"true,false" }}')"
+                                class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#EditarCursoModal">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button type="button"
+                                onclick="eliminarCurso('{{ c.id_curso }}')"
+                                class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#EliminarCursoModal">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center text-muted">No hay cursos registrados</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if messages %}
+<script id="django-messages-data" type="application/json">
+[{% for message in messages %}"{{ message|escapejs }}"{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+{% endif %}
+{% endblock %}

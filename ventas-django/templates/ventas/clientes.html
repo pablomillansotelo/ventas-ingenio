@@ -121,7 +121,7 @@
                         <td>{{ i.telefono }}</td>
                         <td>
                             <button type="button"
-                                onclick="editarPersonal('{{ i.id_cliente }}','{{ i.nombre|escapejs }}', '{{ i.apellidos|escapejs }}', '{{ i.direccion|escapejs }}', '{{ i.email|escapejs }}', '{{ i.telefono|escapejs }}')"
+                                onclick="editarPersonal('{{ i.id_cliente }}','{{ i.nombre|escapejs }}', '{{ i.apellidos|escapejs }}', '{{ i.direccion|escapejs }}', '{{ i.email|escapejs }}', '{{ i.telefono|escapejs }}', '{{ i.curp|default:""|escapejs }}', '{{ i.empresa|default:""|escapejs }}')"
                                 class="btn btn-outline-dark btn-sm"
                                 data-bs-toggle="modal"
                                 data-bs-target="#EditarPersonalModal"

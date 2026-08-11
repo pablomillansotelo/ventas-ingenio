@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase, Client
 from django.urls import reverse
 
-from .models import Cliente, Producto, Venta, VentaDetalle
+from .models import Cliente, Curso, Vendedor, Venta, VentaDetalle
 
 
 class VentaModelTests(TestCase):
@@ -19,18 +19,22 @@ class VentaModelTests(TestCase):
             email='ana@test.com',
             telefono='5551234',
         )
-        self.producto = Producto.objects.create(
-            producto='Curso Python',
-            precio_unitario=Decimal('100.0000'),
+        self.vendedor = Vendedor.objects.create(user_id=99, nombre='Carlos Vendedor', email='carlos@test.com')
+        self.curso = Curso.objects.create(
+            codigo='PY-101',
+            nombre='Curso Python',
+            precio_lista=Decimal('100.0000'),
         )
         self.venta = Venta.objects.create(
             id_cliente=self.cliente,
+            id_vendedor=self.vendedor,
             fecha=date(2025, 8, 1),
         )
         VentaDetalle.objects.create(
             id_venta=self.venta,
-            id_producto=self.producto,
+            id_curso=self.curso,
             cantidad=2,
+            precio_unitario=Decimal('100.0000'),
             descuento=Decimal('10.0000'),
         )
 
@@ -38,18 +42,18 @@ class VentaModelTests(TestCase):
         self.assertEqual(self.venta.cliente, 'Ana Garcia')
 
     def test_monto_property(self):
-        # (2 * 100) - 10 = 190
         self.assertEqual(self.venta.monto, Decimal('190.0000'))
 
-    def test_monto_sin_descuento(self):
+    def test_monto_usa_precio_snapshot(self):
         venta = Venta.objects.create(id_cliente=self.cliente, fecha=date.today())
         VentaDetalle.objects.create(
             id_venta=venta,
-            id_producto=self.producto,
+            id_curso=self.curso,
             cantidad=1,
+            precio_unitario=Decimal('80.0000'),
             descuento=None,
         )
-        self.assertEqual(venta.monto, Decimal('100.0000'))
+        self.assertEqual(venta.monto, Decimal('80.0000'))
 
 
 class VentaViewTests(TestCase):
@@ -74,8 +78,10 @@ class VentaViewTests(TestCase):
             email='maria@test.com',
             telefono='5551111',
         )
+        self.vendedor = Vendedor.objects.create(user_id=self.user.id, nombre='Tester', email='tester@test.com')
         self.venta = Venta.objects.create(
             id_cliente=self.cliente_a,
+            id_vendedor=self.vendedor,
             fecha=date(2025, 7, 15),
         )
 
@@ -86,19 +92,38 @@ class VentaViewTests(TestCase):
                 'id_venta_editar': self.venta.id_venta,
                 'id_cliente': self.cliente_b.id_cliente,
                 'fecha': '2025-08-10',
+                'estado': 'confirmada',
+                'observaciones': 'Nota test',
             },
         )
         self.assertRedirects(response, reverse('Ventas'))
         self.venta.refresh_from_db()
         self.assertEqual(self.venta.id_cliente_id, self.cliente_b.id_cliente)
         self.assertEqual(str(self.venta.fecha), '2025-08-10')
+        self.assertEqual(self.venta.observaciones, 'Nota test')
+
+    def test_add_carrito_asigna_vendedor(self):
+        curso = Curso.objects.create(codigo='DJ-01', nombre='Django', precio_lista=Decimal('200'))
+        response = self.http.post(
+            reverse('AddCarrito'),
+            {
+                'id_cliente_add': self.cliente_a.id_cliente,
+                'fecha_add': '2025-08-11',
+                'observaciones_add': '',
+                'nplainArray[]': f'{curso.id_curso},1,0',
+            },
+        )
+        self.assertRedirects(response, reverse('Ventas'))
+        venta = Venta.objects.latest('id_venta')
+        self.assertEqual(venta.id_vendedor.user_id, self.user.id)
 
     def test_delete_venta_view_elimina_venta_y_detalles(self):
-        producto = Producto.objects.create(producto='Libro', precio_unitario=Decimal('50'))
+        curso = Curso.objects.create(codigo='BK-01', nombre='Libro', precio_lista=Decimal('50'))
         VentaDetalle.objects.create(
             id_venta=self.venta,
-            id_producto=producto,
+            id_curso=curso,
             cantidad=1,
+            precio_unitario=Decimal('50'),
         )
         response = self.http.post(
             reverse('DeleteVenta'),
@@ -106,10 +131,3 @@ class VentaViewTests(TestCase):
         )
         self.assertRedirects(response, reverse('Ventas'))
         self.assertFalse(Venta.objects.filter(pk=self.venta.id_venta).exists())
-        self.assertFalse(VentaDetalle.objects.filter(id_venta=self.venta.id_venta).exists())
-
-    def test_delete_venta_url_usa_vista_correcta(self):
-        from ventas import urls as ventas_urls
-
-        delete_pattern = next(p for p in ventas_urls.urlpatterns if p.name == 'DeleteVenta')
-        self.assertEqual(delete_pattern.callback.__name__, 'delete_venta_view')

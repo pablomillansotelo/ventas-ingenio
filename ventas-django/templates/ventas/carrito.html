@@ -5,80 +5,81 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <!-- Datos de la factura -->
+            <div class="alert alert-light border mb-3">
+                <strong>Vendedor:</strong> {{ vendedor.nombre }}
+            </div>
+
             <div class="card card-secondary">
                 <div class="card-header">
-                    <h6 class="card-title"><i class="bi bi-cart"></i> Datos de la factura</h6>
+                    <h6 class="card-title"><i class="bi bi-receipt"></i> Datos de la venta</h6>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
+                            <label for="id_cliente_add">{{ form_venta.id_cliente.label }}</label>
                             {{ form_venta.id_cliente }}
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
+                            <label for="fecha_add">{{ form_venta.fecha.label }}</label>
                             {{ form_venta.fecha }}
+                        </div>
+                        <div class="col-md-12">
+                            <label for="observaciones_add">{{ form_venta.observaciones.label }}</label>
+                            {{ form_venta.observaciones }}
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Agregar Producto -->
+
             <div class="mt-4">
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="card-title"><i class="bi bi-cart-plus"></i> Agregar Producto</h6>
+                        <h6 class="card-title"><i class="bi bi-journal-plus"></i> Agregar curso</h6>
                     </div>
-                    <form id="formAddProducto" onsubmit="event.preventDefault(); agregarProducto();">
+                    <form id="formAddCurso" onsubmit="event.preventDefault(); agregarCurso();">
+                        {% csrf_token %}
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label for="{{ form_add_venta_detalle.id_producto.id_for_label }}">
-                                        {{ form_add_venta_detalle.id_producto.label }}
-                                    </label>
-                                    {{ form_add_venta_detalle.id_producto }}
+                                    <label for="id_curso_add">{{ form_add_venta_detalle.id_curso.label }}</label>
+                                    {{ form_add_venta_detalle.id_curso }}
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="{{ form_add_venta_detalle.cantidad.id_for_label }}">
-                                        {{ form_add_venta_detalle.cantidad.label }}
-                                    </label>
+                                    <label for="cantidad_add">{{ form_add_venta_detalle.cantidad.label }}</label>
                                     {{ form_add_venta_detalle.cantidad }}
                                 </div>
                                 <div class="col-md-3">
-                                    <label for="{{ form_add_venta_detalle.descuento.id_for_label }}">
-                                        {{ form_add_venta_detalle.descuento.label }}
-                                    </label>
+                                    <label for="descuento_add">{{ form_add_venta_detalle.descuento.label }}</label>
                                     {{ form_add_venta_detalle.descuento }}
                                 </div>
                             </div>
                             <div class="mt-4">
                                 <button type="submit" class="btn btn-success">
-                                    Agregar Producto
-                                    <i class="bi bi-plus-circle"></i>
+                                    Agregar curso <i class="bi bi-plus-circle"></i>
                                 </button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
-            <!-- Detalle del carrito -->
+
             <div class="card mt-4" style="overflow:scroll">
                 <table class="table table-hover table-primary" id="tblProducts">
                     <thead>
                         <tr>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
+                            <th>Curso</th>
+                            <th>Plazas</th>
                             <th>Descuento</th>
                             <th>Opciones</th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
-            <!-- Botón pagar -->
+
             <div class="row mt-4">
                 <button onclick="pagar_carrito()" type="button" class="btn btn-success">
-                    Pagar carrito
-                    <i class="bi bi-plus-circle"></i>
+                    Confirmar venta <i class="bi bi-check-circle"></i>
                 </button>
             </div>
         </div>
@@ -88,23 +89,23 @@
 <script>
 let carrito = [];
 
-function agregarProducto() {
-    const id_producto = document.getElementById('id_producto_add').value;
-    const nombre_producto = document.getElementById('id_producto_add').selectedOptions[0].text;
+function agregarCurso() {
+    const id_curso = document.getElementById('id_curso_add').value;
+    const select = document.getElementById('id_curso_add');
+    const nombre_curso = select.selectedOptions[0]?.text || '';
     const cantidad = document.getElementById('cantidad_add').value;
     const descuento = document.getElementById('descuento_add').value;
 
-    if (!id_producto || !cantidad) {
-        alert("Selecciona producto y cantidad");
+    if (!id_curso || !cantidad) {
+        alert('Selecciona curso y plazas');
         return;
     }
 
-    carrito.push({id_producto, nombre_producto, cantidad, descuento});
+    carrito.push({ id_curso, nombre_curso, cantidad, descuento });
     renderCarrito();
 
-    // Limpia los campos
-    document.getElementById('id_producto_add').selectedIndex = 0;
-    document.getElementById('cantidad_add').value = '';
+    select.selectedIndex = 0;
+    document.getElementById('cantidad_add').value = '1';
     document.getElementById('descuento_add').value = '';
 }
 
@@ -113,10 +114,10 @@ function renderCarrito() {
     tbody.innerHTML = '';
     carrito.forEach((item, idx) => {
         tbody.innerHTML += `<tr>
-            <td>${item.nombre_producto}</td>
+            <td>${item.nombre_curso}</td>
             <td>${item.cantidad}</td>
-            <td>${item.descuento || ''}</td>
-            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarItemCarrito(${idx})">Eliminar</button></td>
+            <td>${item.descuento || '—'}</td>
+            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarItemCarrito(${idx})">Quitar</button></td>
         </tr>`;
     });
 }
@@ -129,31 +130,29 @@ function eliminarItemCarrito(idx) {
 function pagar_carrito() {
     const id_cliente = document.getElementById('id_cliente_add').value;
     const fecha = document.getElementById('fecha_add').value;
+    const observaciones = document.getElementById('observaciones_add').value;
 
     if (!id_cliente || !fecha || carrito.length === 0) {
-        alert("Selecciona cliente, fecha y agrega al menos un producto.");
+        alert('Selecciona cliente, fecha y agrega al menos un curso.');
         return;
     }
 
-    // Crea un formulario y lo envía por POST
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = "{% url 'AddCarrito' %}";
 
-    // CSRF token
     const csrf = document.createElement('input');
     csrf.type = 'hidden';
     csrf.name = 'csrfmiddlewaretoken';
     csrf.value = '{{ csrf_token }}';
     form.appendChild(csrf);
 
-    // Cliente y fecha
     form.innerHTML += `<input type="hidden" name="id_cliente_add" value="${id_cliente}">`;
     form.innerHTML += `<input type="hidden" name="fecha_add" value="${fecha}">`;
+    form.innerHTML += `<input type="hidden" name="observaciones_add" value="${observaciones.replace(/"/g, '&quot;')}">`;
 
-    // Productos
     carrito.forEach((item) => {
-        form.innerHTML += `<input type="hidden" name="nplainArray[]" value="${item.id_producto},${item.cantidad},${item.descuento}">`;
+        form.innerHTML += `<input type="hidden" name="nplainArray[]" value="${item.id_curso},${item.cantidad},${item.descuento}">`;
     });
 
     document.body.appendChild(form);

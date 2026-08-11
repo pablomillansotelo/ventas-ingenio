@@ -2,66 +2,93 @@
 {% load static %}
 {% block content %}
 
-<div id="EditarVentaModal" class="modal fade" tabindex="-1" aria-labelledby="EditarVentaModalLabel" aria-hidden="true">
+<div id="EditarVentaModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="EditarVentaModalLabel">Editar Venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title text-dark">Editar venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{% url 'EditVenta' %}">
                 {% csrf_token %}
                 <input type="hidden" id="id_venta_editar" name="id_venta_editar">
                 <div class="modal-body bg-dark text-white">
                     {% for field in form_editar_venta %}
-                    <p>{{ field.label }}<br>
-                        {{ field }}</p>
-                    {% for error in field.errors %}
-                    <p class="alarma">{{ error }}</p>
-                    {% endfor %}
-                    {% endfor %}
-                    {% for error in form_editar_venta.non_field_errors %}
-                    <p class="alarma">{{ error }}</p>
+                    <p>{{ field.label }}<br>{{ field }}</p>
                     {% endfor %}
                 </div>
                 <div class="modal-footer bg-dark text-white">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
-                    <button type="submit" class="btn btn-success">Aceptar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<div id="EliminarVentaModal" class="modal fade" tabindex="-1" aria-labelledby="EliminarVentaModalLabel" aria-hidden="true">
+<div id="EliminarVentaModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-info">
-                <h5 class="modal-title text-dark" id="EliminarVentaModalLabel">Eliminar venta</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                <h5 class="modal-title text-dark">Eliminar venta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form method="POST" action="{% url 'DeleteVenta' %}">
                 {% csrf_token %}
                 <input type="hidden" id="id_venta_eliminar" name="id_venta_eliminar">
                 <div class="modal-body bg-dark text-white">
-                    <p class="labelmodal">¿Estás seguro?</p>
+                    <p>¿Confirmas eliminar esta venta y sus cursos?</p>
                 </div>
                 <div class="modal-footer bg-dark text-white">
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Volver</button>
-                    <button type="submit" class="btn btn-success">Aceptar</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Eliminar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+{% for v in Ventas %}
+<div class="modal fade" id="detalleVenta{{ v.id_venta }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-dark">Venta #{{ v.id_venta }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Cliente:</strong> {{ v.cliente }}</p>
+                <p><strong>Vendedor:</strong> {{ v.vendedor_nombre }}</p>
+                <p><strong>Fecha:</strong> {{ v.fecha|date:"d/m/Y" }}</p>
+                <p><strong>Estado:</strong> {{ v.get_estado_display }}</p>
+                {% if v.observaciones %}<p><strong>Observaciones:</strong> {{ v.observaciones }}</p>{% endif %}
+                <table class="table table-sm mt-3">
+                    <thead><tr><th>Curso</th><th>Plazas</th><th>Precio</th><th>Descuento</th><th>Subtotal</th></tr></thead>
+                    <tbody>
+                        {% for d in v.ventadetalle_set.all %}
+                        <tr>
+                            <td>{{ d.id_curso.nombre }}</td>
+                            <td>{{ d.cantidad }}</td>
+                            <td>${{ d.precio_aplicado|floatformat:2 }}</td>
+                            <td>{% if d.descuento %}${{ d.descuento|floatformat:2 }}{% else %}—{% endif %}</td>
+                            <td>${{ d.subtotal|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot><tr><th colspan="4" class="text-end">Total</th><th>${{ v.monto|floatformat:2 }}</th></tr></tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 <div class="row">
     <div class="col-md-12">
-        <h3 class="text-center">Ventas</h3>
+        <h3 class="text-center">Ventas de cursos</h3>
         <div class="col-md-3 pb-2">
             <a href="{% url 'Carrito' %}" class="btn btn-success">
-                Crear venta
-                <i class="bi bi-plus-circle"></i>
+                Nueva venta <i class="bi bi-plus-circle"></i>
             </a>
         </div>
         <div class="card card-body" style="overflow:scroll">
@@ -70,37 +97,42 @@
                     <tr>
                         <th>ID</th>
                         <th>Cliente</th>
+                        <th>Vendedor</th>
                         <th>Fecha</th>
-                        <th>Monto</th>
+                        <th>Cursos</th>
+                        <th>Total</th>
+                        <th>Estado</th>
                         <th>Opciones</th>
                     </tr>
                 </thead>
                 <tbody class="text-dark">
                     {% for i in Ventas %}
                     <tr>
-                        <td>{{ i.id_venta }}</td>
+                        <td>#{{ i.id_venta }}</td>
                         <td>{{ i.cliente }}</td>
-                        <td>{{ i.fecha }}</td>
-                        <td>{{ i.monto|floatformat:2 }}</td>
+                        <td>{{ i.vendedor_nombre }}</td>
+                        <td>{{ i.fecha|date:"d/m/Y" }}</td>
+                        <td>{{ i.ventadetalle_set.count }}</td>
+                        <td>${{ i.monto|floatformat:2 }}</td>
+                        <td>{{ i.get_estado_display }}</td>
                         <td>
+                            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#detalleVenta{{ i.id_venta }}" title="Ver detalle">
+                                <i class="bi bi-eye"></i>
+                            </button>
                             <button type="button"
-                                onclick="editarVenta('{{ i.id_venta }}', '{{ i.id_cliente_id }}', '{{ i.fecha|date:"Y-m-d" }}')"
-                                class="btn btn-outline-dark btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#EditarVentaModal"
-                                title="Editar">
+                                onclick="editarVenta('{{ i.id_venta }}', '{{ i.id_cliente_id }}', '{{ i.fecha|date:"Y-m-d" }}', '{{ i.estado }}', '{{ i.observaciones|escapejs }}')"
+                                class="btn btn-outline-dark btn-sm" data-bs-toggle="modal" data-bs-target="#EditarVentaModal">
                                 <i class="bi bi-pencil"></i>
                             </button>
                             <button type="button"
                                 onclick="eliminarVenta('{{ i.id_venta }}')"
-                                class="btn btn-outline-danger btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#EliminarVentaModal"
-                                title="Eliminar">
+                                class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#EliminarVentaModal">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </td>
                     </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted">No hay ventas registradas</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
