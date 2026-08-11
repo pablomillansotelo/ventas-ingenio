@@ -120,12 +120,12 @@
                             <button onclick="editarPersonal('{{ i.id_cliente }}','{{ i.nombre }}', '{{ i.apellidos }}', '{{ i.direccion }}', '{{ i.email }}', '{{ i.telefono }}')" class="btn btn-dark-outline btn-sm" data-toggle="modal"
                                 href="#VerVentaModal"><img src="{% static 'index/img/chart.png' %}" alt="Error"
                                     width="30"></button>
-                            <button onclick="editarVenta('{{ i.id_venta }}','{{ i.cliente }}', '{{ i.fecha }}')" class="btn btn-dark-outline btn-sm" data-toggle="modal"
-                                href="#EditarVentaModal"><img src="{% static 'index/img/editar.png' %}" alt="Error"
+                            <button onclick="editarVenta('{{ i.id_venta }}', '{{ i.id_cliente_id }}', '{{ i.fecha|date:"Y-m-d" }}')" class="btn btn-dark-outline btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#EditarVentaModal"><img src="{% static 'index/img/editar.png' %}" alt="Editar"
                                     width="30"></button>
-                            <button onclick="eliminarPersonal('{{ i.id_venta }}')" class="btn btn-dark-outline btn-sm"
-                                data-toggle="modal" href="#EliminarVentaModal"><img
-                                    src="{% static 'index/img/delete.png' %}" alt="Error" width="30"></button>
+                            <button onclick="eliminarVenta('{{ i.id_venta }}')" class="btn btn-dark-outline btn-sm"
+                                data-bs-toggle="modal" data-bs-target="#EliminarVentaModal"><img
+                                    src="{% static 'index/img/delete.png' %}" alt="Eliminar" width="30"></button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -134,6 +134,24 @@
         </div>
     </div>
 </div>
+<script>
+function editarVenta(idVenta, idCliente, fecha) {
+    document.getElementById('id_venta_editar').value = idVenta;
+    const clienteSelect = document.getElementById('id_cliente_editar');
+    if (clienteSelect) {
+        clienteSelect.value = idCliente;
+    }
+    const fechaInput = document.getElementById('fecha_editar');
+    if (fechaInput) {
+        fechaInput.value = fecha;
+    }
+}
+
+function eliminarVenta(idVenta) {
+    document.getElementById('id_venta_eliminar').value = idVenta;
+}
+</script>
+
 {% if messages %}
 {% for message in messages %}
 <script>
