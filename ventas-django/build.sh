@@ -3,5 +3,6 @@ set -euo pipefail
 
 pip install -r requirements.txt
 python manage.py collectstatic --noinput
-python manage.py migrate --noinput
-python manage.py migrate --database=auth --noinput
+
+# Las migraciones se aplican en api/wsgi.py al arrancar (runtime),
+# porque en Vercel las variables de BD no suelen estar en el build.
