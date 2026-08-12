@@ -122,7 +122,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LOGIN_REDIRECT_URL = '/ventas/carrito/'
+LOGIN_REDIRECT_URL = '/ventas/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/'
 

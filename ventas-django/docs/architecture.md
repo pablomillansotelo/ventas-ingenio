@@ -1,60 +1,81 @@
-# Arquitectura del Sistema
+# Ventas Ingenio — Arquitectura
 
-## Estructura General
+Sistema monolítico Django para **venta e inscripción de cursos** del ecosistema Modelo Ingenio.
 
-El proyecto sigue el patrón MVT (Model-View-Template) estándar de Django, pero introduce una arquitectura de múltiples bases de datos para separar preocupaciones.
+## Patrón arquitectónico
 
-### Estructura de Directorios
+| Capa | Implementación |
+|------|----------------|
+| **Presentación** | Templates Django + Bootstrap 5 + design tokens (`tokens.css`, `app.css`) |
+| **Navegación** | Sidebar fija + topbar (`base.html`, `includes/sidebar.html`) |
+| **Controladores** | Function-based views (`@login_required`), POST → redirect (PRG) |
+| **Formularios** | `ModelForm` por entidad, modales Bootstrap para CRUD |
+| **Persistencia** | PostgreSQL dual: `default` (negocio) + `auth` (usuarios Django) |
+| **Router** | `AuthRouter` enruta auth/admin/sessions a BD `auth` |
+| **Integración** | `services.py` + `signals.py` (SII alumnos, Aula inscripciones) |
+| **Deploy** | Vercel serverless + WhiteNoise + `AutoMigrateMiddleware` + `db_schema.py` |
 
-*   `api/`: Configuración del proyecto.
-*   `ventas/`: Aplicación principal.
-*   `dbrouters/`: Lógica de enrutamiento de DB.
+## Modelo de datos
 
-## Modelos de Datos (`ventas`)
+```mermaid
+erDiagram
+    Cliente ||--o{ Venta : compra
+    Cliente ||--o{ Inscripcion : se_inscribe
+    Vendedor ||--o{ Venta : vende
+    Curso ||--o{ EdicionCurso : tiene
+    Curso ||--o{ VentaDetalle : linea
+    Curso ||--o{ Inscripcion : curso
+    EdicionCurso ||--o{ VentaDetalle : edicion
+    EdicionCurso ||--o{ Inscripcion : cohorte
+    Venta ||--|{ VentaDetalle : contiene
+    Venta ||--o{ Pago : cobros
+    VentaDetalle ||--o| Inscripcion : genera
+```
 
-La aplicación `ventas` gestiona la lógica de negocio principal. Sus modelos residen en la base de datos `default`.
+### Entidades
 
-### 1. Cliente (`cat_cliente`)
-Almacena la información de los clientes.
-*   `id_cliente`: PK
-*   `nombre`, `apellidos`, `direccion`, `email`, `telefono`
+| Modelo | Tabla | Descripción |
+|--------|-------|-------------|
+| **Cliente** | `cat_cliente` | Comprador/alumno (CURP, empresa, `id_alumno_sii`) |
+| **Vendedor** | `cat_vendedor` | Comercial vinculado a `auth.User` por `user_id` |
+| **Curso** | `cat_producto` | Catálogo de cursos (legacy column names) |
+| **EdicionCurso** | `cat_edicion_curso` | Cohorte: fechas, cupo, precio override |
+| **Venta** | `tra_venta` | Encabezado: folio, estado, estado_pago |
+| **VentaDetalle** | `tra_venta_det` | Línea: curso, edición opcional, precio snapshot |
+| **Pago** | `tra_pago` | Cobros parciales o totales de una venta |
+| **Inscripcion** | `tra_inscripcion` | Matrícula del cliente a curso/edición |
 
-### 2. Producto (`cat_producto`)
-Catálogo de productos disponibles.
-*   `id_producto`: PK
-*   `producto`: Nombre del producto
-*   `precio_unitario`: Precio decimal
+## Pantallas
 
-### 3. Venta (`tra_venta`)
-Cabecera de una transacción de venta.
-*   `id_venta`: PK
-*   `id_cliente`: FK a Cliente
-*   `fecha`: Fecha de la venta
+| Ruta | Pantalla |
+|------|----------|
+| `/ventas/` | Panel de control (KPIs) |
+| `/ventas/carrito/` | Punto de venta multi-curso/edición |
+| `/ventas/ventas/` | Historial de ventas |
+| `/ventas/pagos/` | Registro de pagos |
+| `/ventas/inscripciones/` | Matrículas activas |
+| `/ventas/clientes/` | CRUD clientes |
+| `/ventas/vendedores/` | CRUD vendedores |
+| `/ventas/cursos/` | CRUD catálogo |
+| `/ventas/ediciones/` | CRUD cohortes |
 
-### 4. VentaDetalle (`tra_venta_det`)
-Detalle de productos por venta.
-*   `id_venta`: FK a Venta
-*   `id_producto`: FK a Producto
-*   `cantidad`: Cantidad vendida
-*   `descuento`: Descuento aplicado
+## Flujo de venta
 
-## Estrategia de Múltiples Bases de Datos
+1. Vendedor inicia sesión → panel o punto de venta.
+2. Selecciona cliente, curso y opcionalmente **edición** (valida cupo).
+3. Confirma venta → crea `Venta`, `VentaDetalle`, `Inscripcion`.
+4. Registra **pagos** en `/ventas/pagos/` → actualiza `estado_pago`.
+5. Signals sincronizan alumno (SII) e inscripción (Aula) de forma best-effort.
 
-El sistema utiliza un **Database Router** personalizado (`api.dbrouters.auth_router.AuthRouter`) para dirigir las operaciones de base de datos.
+## Migraciones
 
-*   **Base de Datos `auth`**: Se utiliza para las aplicaciones de sistema de Django:
-    *   `auth` (Usuarios, Grupos)
-    *   `admin` (Interfaz administrativa)
-    *   `sessions` (Sesiones de usuario)
-    *   `contenttypes`
+| # | Archivo | Propósito |
+|---|---------|-----------|
+| 0001 | initial | Esquema legacy producto/venta |
+| 0002 | dominio_cursos_vendedores | Curso, Vendedor, campos extendidos |
+| 0003 | ensure_schema_postgres | SQL idempotente Neon |
+| 0004 | dominio_completo | Ediciones, Pagos, Inscripciones, folio |
 
-*   **Base de Datos `default`**: Se utiliza para todo lo demás, específicamente la aplicación `ventas`.
+## Esquema SQL canónico
 
-Esto permite que la información de usuarios del sistema esté desacoplada de la información transaccional del negocio.
-
-## Frontend
-
-El frontend se sirve directamente desde Django utilizando **Django Templates**.
-*   Las plantillas base se encuentran en `templates/`.
-*   Los archivos estáticos (CSS, JS) se encuentran en `static/`.
-*   Se utiliza `whitenoise` para servir archivos estáticos en producción.
+Ver `ventas-sql/init.sql` y respaldo runtime en `api/db_schema.py`.

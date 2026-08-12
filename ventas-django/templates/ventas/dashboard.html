@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Panel — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Principal / Panel{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Panel de control</h1>
+    <p class="page-subtitle">Resumen del sistema de venta de cursos</p>
+  </div>
+  <a href="{% url 'Carrito' %}" class="btn btn-brand">
+    <i class="bi bi-cart-plus me-1"></i> Nueva venta
+  </a>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4 col-lg-2">
+    <div class="card-app h-100">
+      <div class="card-app-body text-center py-4">
+        <div class="display-6 fw-bold text-brand">{{ total_clientes }}</div>
+        <div class="text-muted small">Clientes activos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-lg-2">
+    <div class="card-app h-100">
+      <div class="card-app-body text-center py-4">
+        <div class="display-6 fw-bold text-brand">{{ total_cursos }}</div>
+        <div class="text-muted small">Cursos activos</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-lg-2">
+    <div class="card-app h-100">
+      <div class="card-app-body text-center py-4">
+        <div class="display-6 fw-bold text-brand">{{ ediciones_abiertas }}</div>
+        <div class="text-muted small">Ediciones abiertas</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-lg-2">
+    <div class="card-app h-100">
+      <div class="card-app-body text-center py-4">
+        <div class="display-6 fw-bold text-brand">{{ ventas_mes_count }}</div>
+        <div class="text-muted small">Ventas del mes</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-lg-2">
+    <div class="card-app h-100">
+      <div class="card-app-body text-center py-4">
+        <div class="display-6 fw-bold text-brand">${{ ventas_mes_monto|floatformat:0 }}</div>
+        <div class="text-muted small">Monto del mes</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 col-lg-2">
+    <div class="card-app h-100">
+      <div class="card-app-body text-center py-4">
+        <div class="display-6 fw-bold text-brand">{{ inscripciones_activas }}</div>
+        <div class="text-muted small">Inscripciones activas</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card-app">
+      <div class="card-app-header"><i class="bi bi-receipt"></i> Últimas ventas</div>
+      <div class="card-app-body p-0">
+        <div class="table-responsive-app">
+          <table class="table table-app mb-0">
+            <thead>
+              <tr>
+                <th>Folio</th>
+                <th>Cliente</th>
+                <th>Vendedor</th>
+                <th>Fecha</th>
+                <th class="text-end">Total</th>
+                <th>Pago</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in ultimas_ventas %}
+              <tr>
+                <td>{{ v.folio|default:v.id_venta }}</td>
+                <td>{{ v.cliente }}</td>
+                <td>{{ v.vendedor_nombre }}</td>
+                <td>{{ v.fecha|date:"d/m/Y" }}</td>
+                <td class="text-end">${{ v.monto|floatformat:2 }}</td>
+                <td>{{ v.get_estado_pago_display }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="6" class="text-center text-muted py-4">Sin ventas recientes</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card-app">
+      <div class="card-app-header"><i class="bi bi-lightning"></i> Accesos rápidos</div>
+      <div class="card-app-body d-grid gap-2">
+        <a href="{% url 'Pagos' %}" class="btn btn-ghost text-start">
+          <i class="bi bi-credit-card me-2"></i> Registrar pago
+          {% if pagos_pendientes %}<span class="badge bg-warning text-dark ms-1">{{ pagos_pendientes }}</span>{% endif %}
+        </a>
+        <a href="{% url 'Ediciones' %}" class="btn btn-ghost text-start"><i class="bi bi-calendar-plus me-2"></i> Gestionar ediciones</a>
+        <a href="{% url 'Inscripciones' %}" class="btn btn-ghost text-start"><i class="bi bi-mortarboard me-2"></i> Ver inscripciones</a>
+        <a href="{% url 'Clientes' %}" class="btn btn-ghost text-start"><i class="bi bi-person-plus me-2"></i> Nuevo cliente</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "includes/messages.html" %}
+{% endblock %}

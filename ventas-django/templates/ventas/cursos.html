@@ -24,6 +24,7 @@
             <th>Curso</th>
             <th>Modalidad</th>
             <th class="text-center">Horas</th>
+            <th class="text-center">Ediciones</th>
             <th class="text-end">Precio</th>
             <th>Estado</th>
             <th class="text-end">Acciones</th>
@@ -36,6 +37,7 @@
             <td class="fw-medium">{{ c.nombre }}</td>
             <td>{{ c.get_modalidad_display }}</td>
             <td class="text-center">{{ c.duracion_horas|default:"—" }}</td>
+            <td class="text-center">{{ c.num_ediciones }}</td>
             <td class="text-end">${{ c.precio_lista|floatformat:2 }}</td>
             <td>
               {% if c.activo %}

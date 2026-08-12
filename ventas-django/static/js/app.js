@@ -38,16 +38,70 @@ function eliminarCurso(id) {
     setFieldValue('id_curso_eliminar', id);
 }
 
-function editarVenta(idVenta, idCliente, fecha, estado, observaciones) {
+function editarVenta(idVenta, idCliente, fecha, estado, estadoPago, observaciones) {
     setFieldValue('id_venta_editar', idVenta);
     setFieldValue('id_cliente_editar', idCliente);
     setFieldValue('fecha_editar', fecha);
     setFieldValue('estado_editar', estado || 'confirmada');
+    setFieldValue('estado_pago_editar', estadoPago || 'pendiente');
     setFieldValue('observaciones_editar', observaciones || '');
 }
 
 function eliminarVenta(idVenta) {
     setFieldValue('id_venta_eliminar', idVenta);
+}
+
+function editarVendedor(id, userId, nombre, email, telefono, comision, activo) {
+    setFieldValue('id_vendedor_editar', id);
+    setFieldValue('user_id_editar', userId);
+    setFieldValue('nombre_vendedor_editar', nombre);
+    setFieldValue('email_vendedor_editar', email);
+    setFieldValue('telefono_vendedor_editar', telefono);
+    setFieldValue('comision_editar', comision);
+    setCheckboxValue('activo_vendedor_editar', activo);
+}
+
+function eliminarVendedor(id) {
+    setFieldValue('id_vendedor_eliminar', id);
+}
+
+function editarEdicion(id, cursoId, codigo, inicio, fin, cupo, precio, estado, activo) {
+    setFieldValue('id_edicion_editar', id);
+    setFieldValue('id_curso_edicion_editar', cursoId);
+    setFieldValue('codigo_edicion_editar', codigo);
+    setFieldValue('fecha_inicio_editar', inicio);
+    setFieldValue('fecha_fin_editar', fin || '');
+    setFieldValue('cupo_maximo_editar', cupo);
+    setFieldValue('precio_edicion_editar', precio);
+    setFieldValue('estado_edicion_editar', estado);
+    setCheckboxValue('activo_edicion_editar', activo);
+}
+
+function eliminarEdicion(id) {
+    setFieldValue('id_edicion_eliminar', id);
+}
+
+function editarPago(id, ventaId, monto, metodo, referencia, fecha, estado) {
+    setFieldValue('id_pago_editar', id);
+    setFieldValue('id_venta_pago_editar', ventaId);
+    setFieldValue('monto_pago_editar', monto);
+    setFieldValue('metodo_pago_editar', metodo);
+    setFieldValue('referencia_pago_editar', referencia);
+    setFieldValue('fecha_pago_editar', fecha);
+    setFieldValue('estado_pago_reg_editar', estado);
+}
+
+function eliminarPago(id) {
+    setFieldValue('id_pago_eliminar', id);
+}
+
+function editarInscripcion(id, estado) {
+    setFieldValue('id_inscripcion_editar', id);
+    setFieldValue('estado_inscripcion_editar', estado);
+}
+
+function eliminarInscripcion(id) {
+    setFieldValue('id_inscripcion_eliminar', id);
 }
 
 function showMessages(messages) {

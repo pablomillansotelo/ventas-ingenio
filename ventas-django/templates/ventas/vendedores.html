@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Vendedores — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Catálogos / Vendedores{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Vendedores</h1>
+    <p class="page-subtitle">Equipo comercial vinculado a usuarios del sistema</p>
+  </div>
+  <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#modalAgregarVendedor">
+    <i class="bi bi-plus-lg me-1"></i> Nuevo vendedor
+  </button>
+</div>
+
+<div class="card-app">
+  <div class="card-app-body p-0">
+    <div class="table-responsive-app">
+      <table class="table table-app mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>User ID</th>
+            <th class="text-center">Comisión</th>
+            <th class="text-center">Ventas</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for v in Vendedores %}
+          <tr>
+            <td>#{{ v.id_vendedor }}</td>
+            <td class="fw-medium">{{ v.nombre }}</td>
+            <td>{{ v.email|default:"—" }}</td>
+            <td>{{ v.user_id }}</td>
+            <td class="text-center">{{ v.comision_pct }}%</td>
+            <td class="text-center">{{ v.num_ventas }}</td>
+            <td>{% if v.activo %}<span class="badge bg-success-subtle text-success">Activo</span>{% else %}<span class="badge bg-secondary">Inactivo</span>{% endif %}</td>
+            <td class="text-end">
+              <div class="gap-actions justify-content-end">
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarVendedor('{{ v.id_vendedor }}','{{ v.user_id }}','{{ v.nombre|escapejs }}','{{ v.email|escapejs }}','{{ v.telefono|default:""|escapejs }}','{{ v.comision_pct }}','{{ v.activo|yesno:"true,false" }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarVendedor"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-icon btn-icon-delete"
+                  onclick="eliminarVendedor('{{ v.id_vendedor }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEliminarVendedor"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="text-center text-muted py-5">No hay vendedores registrados</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-app" id="modalAgregarVendedor" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <form method="POST" action="{% url 'AddVendedor' %}">{% csrf_token %}
+      <div class="modal-header"><h5 class="modal-title">Nuevo vendedor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">{% include "includes/form_fields.html" with form=form_vendedor %}</div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-brand">Guardar</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade modal-app" id="modalEditarVendedor" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <form method="POST" action="{% url 'EditVendedor' %}">{% csrf_token %}
+      <input type="hidden" id="id_vendedor_editar" name="id_vendedor_editar">
+      <div class="modal-header"><h5 class="modal-title">Editar vendedor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">{% include "includes/form_fields.html" with form=form_editar_vendedor %}</div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-brand">Actualizar</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade modal-app" id="modalEliminarVendedor" tabindex="-1">
+  <div class="modal-dialog modal-sm"><div class="modal-content">
+    <form method="POST" action="{% url 'DeleteVendedor' %}">{% csrf_token %}
+      <input type="hidden" id="id_vendedor_eliminar" name="id_vendedor_eliminar">
+      <div class="modal-header"><h5 class="modal-title">Eliminar vendedor</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><p class="mb-0 text-muted">¿Confirmas eliminar este vendedor?</p></div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-danger">Eliminar</button></div>
+    </form>
+  </div></div>
+</div>
+
+{% include "includes/messages.html" %}
+{% endblock %}

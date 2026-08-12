@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Pagos — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Principal / Pagos{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Pagos</h1>
+    <p class="page-subtitle">Registro de cobros asociados a ventas</p>
+  </div>
+  <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#modalAgregarPago">
+    <i class="bi bi-plus-lg me-1"></i> Registrar pago
+  </button>
+</div>
+
+{% if VentasPendientes %}
+<div class="alert alert-warning border mb-4">
+  <i class="bi bi-exclamation-triangle me-1"></i>
+  <strong>{{ VentasPendientes.count }}</strong> venta(s) con saldo pendiente de pago.
+</div>
+{% endif %}
+
+<div class="card-app mb-4">
+  <div class="card-app-header"><i class="bi bi-list-check"></i> Historial de pagos</div>
+  <div class="card-app-body p-0">
+    <div class="table-responsive-app">
+      <table class="table table-app mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Venta</th>
+            <th>Cliente</th>
+            <th class="text-end">Monto</th>
+            <th>Método</th>
+            <th>Referencia</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in Pagos %}
+          <tr>
+            <td>#{{ p.id_pago }}</td>
+            <td>{{ p.id_venta.folio|default:p.id_venta_id }}</td>
+            <td>{{ p.id_venta.id_cliente.nombre_completo }}</td>
+            <td class="text-end fw-semibold">${{ p.monto|floatformat:2 }}</td>
+            <td>{{ p.get_metodo_display }}</td>
+            <td>{{ p.referencia|default:"—" }}</td>
+            <td>{{ p.fecha_pago|date:"d/m/Y H:i" }}</td>
+            <td>{{ p.get_estado_display }}</td>
+            <td class="text-end">
+              <div class="gap-actions justify-content-end">
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarPago('{{ p.id_pago }}','{{ p.id_venta_id }}','{{ p.monto }}','{{ p.metodo }}','{{ p.referencia|escapejs }}','{{ p.fecha_pago|date:"Y-m-d\TH:i" }}','{{ p.estado }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarPago"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-icon btn-icon-delete"
+                  onclick="eliminarPago('{{ p.id_pago }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEliminarPago"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="9" class="text-center text-muted py-5">No hay pagos registrados</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-app" id="modalAgregarPago" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <form method="POST" action="{% url 'AddPago' %}">{% csrf_token %}
+      <div class="modal-header"><h5 class="modal-title">Registrar pago</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">{% include "includes/form_fields.html" with form=form_pago %}</div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-brand">Guardar</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade modal-app" id="modalEditarPago" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content">
+    <form method="POST" action="{% url 'EditPago' %}">{% csrf_token %}
+      <input type="hidden" id="id_pago_editar" name="id_pago_editar">
+      <div class="modal-header"><h5 class="modal-title">Editar pago</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">{% include "includes/form_fields.html" with form=form_editar_pago %}</div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-brand">Actualizar</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade modal-app" id="modalEliminarPago" tabindex="-1">
+  <div class="modal-dialog modal-sm"><div class="modal-content">
+    <form method="POST" action="{% url 'DeletePago' %}">{% csrf_token %}
+      <input type="hidden" id="id_pago_eliminar" name="id_pago_eliminar">
+      <div class="modal-header"><h5 class="modal-title">Eliminar pago</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><p class="mb-0 text-muted">¿Confirmas eliminar este pago?</p></div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-danger">Eliminar</button></div>
+    </form>
+  </div></div>
+</div>
+
+{% include "includes/messages.html" %}
+{% endblock %}
