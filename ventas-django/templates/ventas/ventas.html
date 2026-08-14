@@ -20,26 +20,28 @@
       <table class="table table-app mb-0">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Folio</th>
             <th>Cliente</th>
             <th>Vendedor</th>
             <th>Fecha</th>
             <th class="text-center">Cursos</th>
             <th class="text-end">Total</th>
-            <th>Estado</th>
+            <th>Venta</th>
+            <th>Pago</th>
             <th class="text-end">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {% for v in Ventas %}
           <tr>
-            <td><span class="text-muted">#{{ v.id_venta }}</span></td>
+            <td><span class="text-muted">{{ v.folio|default:v.id_venta }}</span></td>
             <td class="fw-medium">{{ v.cliente }}</td>
             <td>{{ v.vendedor_nombre }}</td>
             <td>{{ v.fecha|date:"d/m/Y" }}</td>
             <td class="text-center">{{ v.ventadetalle_set.count }}</td>
             <td class="text-end fw-semibold">${{ v.monto|floatformat:2 }}</td>
             <td>{{ v.get_estado_display }}</td>
+            <td>{{ v.get_estado_pago_display }}</td>
             <td class="text-end">
               <div class="gap-actions justify-content-end">
                 <button type="button" class="btn btn-icon btn-icon-edit"
@@ -47,7 +49,7 @@
                   <i class="bi bi-eye"></i>
                 </button>
                 <button type="button" class="btn btn-icon btn-icon-edit"
-                  onclick="editarVenta('{{ v.id_venta }}','{{ v.id_cliente_id }}','{{ v.fecha|date:"Y-m-d" }}','{{ v.estado }}','{{ v.observaciones|escapejs }}')"
+                  onclick="editarVenta('{{ v.id_venta }}','{{ v.id_cliente_id }}','{{ v.fecha|date:"Y-m-d" }}','{{ v.estado }}','{{ v.estado_pago }}','{{ v.observaciones|escapejs }}')"
                   data-bs-toggle="modal" data-bs-target="#modalEditarVenta" title="Editar">
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -61,7 +63,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="8" class="text-center text-muted py-5">No hay ventas registradas</td>
+            <td colspan="9" class="text-center text-muted py-5">No hay ventas registradas</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -75,7 +77,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Venta #{{ v.id_venta }}</h5>
+        <h5 class="modal-title">Venta {{ v.folio|default:v.id_venta }}</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
@@ -83,7 +85,8 @@
           <div class="col-md-6"><strong>Cliente:</strong> {{ v.cliente }}</div>
           <div class="col-md-6"><strong>Vendedor:</strong> {{ v.vendedor_nombre }}</div>
           <div class="col-md-6"><strong>Fecha:</strong> {{ v.fecha|date:"d/m/Y" }}</div>
-          <div class="col-md-6"><strong>Estado:</strong> {{ v.get_estado_display }}</div>
+          <div class="col-md-6"><strong>Estado venta:</strong> {{ v.get_estado_display }}</div>
+          <div class="col-md-6"><strong>Estado pago:</strong> {{ v.get_estado_pago_display }} (Pagado: ${{ v.total_pagado|floatformat:2 }})</div>
           {% if v.observaciones %}
           <div class="col-12"><strong>Observaciones:</strong> {{ v.observaciones }}</div>
           {% endif %}
@@ -101,7 +104,7 @@
           <tbody>
             {% for d in v.ventadetalle_set.all %}
             <tr>
-              <td>{{ d.id_curso.nombre }}</td>
+              <td>{{ d.id_curso.nombre }}{% if d.id_edicion %} · {{ d.id_edicion.codigo_edicion }}{% endif %}</td>
               <td class="text-center">{{ d.cantidad }}</td>
               <td class="text-end">${{ d.precio_aplicado|floatformat:2 }}</td>
               <td class="text-end">{% if d.descuento %}${{ d.descuento|floatformat:2 }}{% else %}—{% endif %}</td>

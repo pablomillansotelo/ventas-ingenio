@@ -38,11 +38,12 @@ function eliminarCurso(id) {
     setFieldValue('id_curso_eliminar', id);
 }
 
-function editarVenta(idVenta, idCliente, fecha, estado, observaciones) {
+function editarVenta(idVenta, idCliente, fecha, estado, estadoPago, observaciones) {
     setFieldValue('id_venta_editar', idVenta);
     setFieldValue('id_cliente_editar', idCliente);
     setFieldValue('fecha_editar', fecha);
     setFieldValue('estado_editar', estado || 'confirmada');
+    setFieldValue('estado_pago_editar', estadoPago || 'pendiente');
     setFieldValue('observaciones_editar', observaciones || '');
 }
 

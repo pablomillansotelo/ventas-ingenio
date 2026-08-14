@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Ediciones — Ventas Ingenio{% endblock %}
+{% block breadcrumb %}Catálogos / Ediciones{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Ediciones de curso</h1>
+    <p class="page-subtitle">Cohortes programadas con fechas, cupo y precio</p>
+  </div>
+  <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#modalAgregarEdicion">
+    <i class="bi bi-plus-lg me-1"></i> Nueva edición
+  </button>
+</div>
+
+<div class="card-app">
+  <div class="card-app-body p-0">
+    <div class="table-responsive-app">
+      <table class="table table-app mb-0">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Curso</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th class="text-center">Cupo</th>
+            <th class="text-end">Precio</th>
+            <th>Estado</th>
+            <th class="text-end">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for e in Ediciones %}
+          <tr>
+            <td class="fw-medium">{{ e.codigo_edicion }}</td>
+            <td>{{ e.id_curso.codigo }} — {{ e.id_curso.nombre }}</td>
+            <td>{{ e.fecha_inicio|date:"d/m/Y" }}</td>
+            <td>{{ e.fecha_fin|date:"d/m/Y"|default:"—" }}</td>
+            <td class="text-center">{{ e.cupo_ocupado }}/{{ e.cupo_maximo }}</td>
+            <td class="text-end">${{ e.precio_aplicable|floatformat:2 }}</td>
+            <td>{{ e.get_estado_display }}</td>
+            <td class="text-end">
+              <div class="gap-actions justify-content-end">
+                <button type="button" class="btn btn-icon btn-icon-edit"
+                  onclick="editarEdicion('{{ e.id_edicion }}','{{ e.id_curso_id }}','{{ e.codigo_edicion|escapejs }}','{{ e.fecha_inicio|date:"Y-m-d" }}','{{ e.fecha_fin|date:"Y-m-d" }}','{{ e.cupo_maximo }}','{{ e.precio_edicion|default:"" }}','{{ e.estado }}','{{ e.activo|yesno:"true,false" }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEditarEdicion"><i class="bi bi-pencil"></i></button>
+                <button type="button" class="btn btn-icon btn-icon-delete"
+                  onclick="eliminarEdicion('{{ e.id_edicion }}')"
+                  data-bs-toggle="modal" data-bs-target="#modalEliminarEdicion"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="8" class="text-center text-muted py-5">No hay ediciones registradas</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade modal-app" id="modalAgregarEdicion" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <form method="POST" action="{% url 'AddEdicion' %}">{% csrf_token %}
+      <div class="modal-header"><h5 class="modal-title">Nueva edición</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">{% include "includes/form_fields.html" with form=form_edicion %}</div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-brand">Guardar</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade modal-app" id="modalEditarEdicion" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <form method="POST" action="{% url 'EditEdicion' %}">{% csrf_token %}
+      <input type="hidden" id="id_edicion_editar" name="id_edicion_editar">
+      <div class="modal-header"><h5 class="modal-title">Editar edición</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">{% include "includes/form_fields.html" with form=form_editar_edicion %}</div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-brand">Actualizar</button></div>
+    </form>
+  </div></div>
+</div>
+
+<div class="modal fade modal-app" id="modalEliminarEdicion" tabindex="-1">
+  <div class="modal-dialog modal-sm"><div class="modal-content">
+    <form method="POST" action="{% url 'DeleteEdicion' %}">{% csrf_token %}
+      <input type="hidden" id="id_edicion_eliminar" name="id_edicion_eliminar">
+      <div class="modal-header"><h5 class="modal-title">Eliminar edición</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><p class="mb-0 text-muted">¿Confirmas eliminar esta edición?</p></div>
+      <div class="modal-footer"><button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-danger">Eliminar</button></div>
+    </form>
+  </div></div>
+</div>
+
+{% include "includes/messages.html" %}
+{% endblock %}

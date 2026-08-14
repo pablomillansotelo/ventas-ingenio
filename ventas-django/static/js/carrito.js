@@ -1,9 +1,30 @@
 let carrito = [];
 
+function filtrarEdicionesPorCurso() {
+    const cursoId = document.getElementById('id_curso_add')?.value;
+    const selectEdicion = document.getElementById('id_edicion_add');
+    if (!selectEdicion) return;
+
+    Array.from(selectEdicion.options).forEach((opt, idx) => {
+        if (idx === 0) {
+            opt.hidden = false;
+            return;
+        }
+        const cursoOpt = opt.dataset.curso;
+        opt.hidden = cursoId && cursoOpt && cursoOpt !== cursoId;
+    });
+    selectEdicion.selectedIndex = 0;
+}
+
 function agregarCurso() {
     const id_curso = document.getElementById('id_curso_add').value;
+    const id_edicion = document.getElementById('id_edicion_add').value;
     const select = document.getElementById('id_curso_add');
-    const nombre_curso = select.selectedOptions[0]?.text || '';
+    const selectEd = document.getElementById('id_edicion_add');
+    let nombre_curso = select.selectedOptions[0]?.text || '';
+    if (id_edicion && selectEd.selectedOptions[0]) {
+        nombre_curso += ' · ' + selectEd.selectedOptions[0].text.trim();
+    }
     const cantidad = document.getElementById('cantidad_add').value;
     const descuento = document.getElementById('descuento_add').value;
 
@@ -12,12 +33,14 @@ function agregarCurso() {
         return;
     }
 
-    carrito.push({ id_curso, nombre_curso, cantidad, descuento });
+    carrito.push({ id_curso, id_edicion, nombre_curso, cantidad, descuento });
     renderCarrito();
 
     select.selectedIndex = 0;
+    if (selectEd) selectEd.selectedIndex = 0;
     document.getElementById('cantidad_add').value = '1';
     document.getElementById('descuento_add').value = '';
+    filtrarEdicionesPorCurso();
 }
 
 function renderCarrito() {
@@ -71,29 +94,19 @@ function pagar_carrito() {
     csrf.value = document.querySelector('[name=csrfmiddlewaretoken]').value;
     form.appendChild(csrf);
 
-    const clienteInput = document.createElement('input');
-    clienteInput.type = 'hidden';
-    clienteInput.name = 'id_cliente_add';
-    clienteInput.value = id_cliente;
-    form.appendChild(clienteInput);
-
-    const fechaInput = document.createElement('input');
-    fechaInput.type = 'hidden';
-    fechaInput.name = 'fecha_add';
-    fechaInput.value = fecha;
-    form.appendChild(fechaInput);
-
-    const obsInput = document.createElement('input');
-    obsInput.type = 'hidden';
-    obsInput.name = 'observaciones_add';
-    obsInput.value = observaciones;
-    form.appendChild(obsInput);
+    ['id_cliente_add', 'fecha_add', 'observaciones_add'].forEach((name, i) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = [id_cliente, fecha, observaciones][i];
+        form.appendChild(input);
+    });
 
     carrito.forEach((item) => {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = 'nplainArray[]';
-        input.value = `${item.id_curso},${item.cantidad},${item.descuento}`;
+        input.value = `${item.id_curso},${item.id_edicion || ''},${item.cantidad},${item.descuento || ''}`;
         form.appendChild(input);
     });
 
@@ -101,4 +114,16 @@ function pagar_carrito() {
     form.submit();
 }
 
-document.addEventListener('DOMContentLoaded', renderCarrito);
+document.addEventListener('DOMContentLoaded', () => {
+    renderCarrito();
+    document.getElementById('id_curso_add')?.addEventListener('change', filtrarEdicionesPorCurso);
+    const selectEd = document.getElementById('id_edicion_add');
+    if (selectEd) {
+        Array.from(selectEd.options).forEach((opt, idx) => {
+            if (idx === 0) return;
+            const match = opt.text.match(/^\[(\d+)\]/);
+            if (match) opt.dataset.curso = match[1];
+        });
+    }
+    filtrarEdicionesPorCurso();
+});
